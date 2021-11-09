@@ -10,32 +10,61 @@ import (
 	"time"
 
 	_ "github.com/mattn/go-sqlite3"
+	uuid "github.com/satori/go.uuid"
 	"golang.org/x/crypto/bcrypt"
 )
 
 type Registration struct {
-	Success  bool
 	NameErr  bool
 	EmailErr bool
 	Username string
 	Email    string
 }
 
+type Login struct {
+	LoginErr bool
+	PassErr  bool
+	Login    string
+}
+
+type MainPage struct {
+	Message   string
+	AlertType string
+}
+
+var COOKIETIME time.Time
+var MAINPAGEDATA MainPage
+
 func main() {
+	COOKIETIME = time.Now().Add(120 * time.Second)
+
 	data := Registration{
-		Success:  false,
 		NameErr:  false,
 		EmailErr: false,
 		Username: "nil",
 		Email:    "nil",
 	}
 
+	loginData := Login{
+		LoginErr: false,
+		PassErr:  false,
+		Login:    "",
+	}
+
+	MAINPAGEDATA = MainPage{
+		Message:   "",
+		AlertType: "",
+	}
+
 	css := http.FileServer(http.Dir("css"))
 	http.Handle("/css/", http.StripPrefix("/css/", css))
 
-	http.HandleFunc("/", LoadMainPage(data))
-	http.HandleFunc("/login", LoadLoginPage(data))
-	http.HandleFunc("/registration", LoadRegistrationPage(data))
+	js := http.FileServer(http.Dir("js"))
+	http.Handle("/js/", http.StripPrefix("/js/", js))
+
+	http.HandleFunc("/", LoadMainPage())
+	http.HandleFunc("/login", LoadLoginPage(&loginData))
+	http.HandleFunc("/registration", LoadRegistrationPage(&data))
 	http.HandleFunc("/exit", ShutdownServer)
 
 	fmt.Println("Server is listening on port 8000...")
@@ -44,23 +73,89 @@ func main() {
 	}
 }
 
-func LoadMainPage(data Registration) http.HandlerFunc {
+func LoadMainPage() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		templ, _ := template.ParseFiles("templates/index.html")
-		ExecuteTempl(templ, w, data)
+
+		if err := templ.Execute(w, MAINPAGEDATA); err != nil {
+			panic(err)
+		}
+
+		MAINPAGEDATA = MainPage{
+			Message:   "",
+			AlertType: "",
+		}
 	}
 }
 
-func LoadLoginPage(data Registration) http.HandlerFunc {
+func LoadLoginPage(loginData *Login) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		templ, _ := template.ParseFiles("templates/login.html")
-		ExecuteTempl(templ, w, data)
+
+		if r.Method == "GET" {
+			ReturnWithCookie(r, w, "login")
+		}
+
+		if r.Method == "POST" {
+			login := r.FormValue("login")
+			password := []byte(r.FormValue("password"))
+
+			db, err := sql.Open("sqlite3", "./db/users.db")
+			CheckErr(err)
+
+			uid, loginExists := DataExists(db, login, "username")
+			if !loginExists {
+				uid, loginExists = DataExists(db, login, "email")
+			}
+
+			if loginExists {
+				var accountHash string
+
+				sqlStmt := "SELECT password FROM users WHERE username = ? OR email = ?"
+				_ = db.QueryRow(sqlStmt, login, login).Scan(&accountHash)
+
+				if bcrypt.CompareHashAndPassword([]byte(accountHash), password) == nil {
+					loginData.LoginErr = false
+					loginData.PassErr = false
+
+					sessionToken := CreateSessionToken(w)
+					stmt, err := db.Prepare("UPDATE users SET session_token = ? WHERE uid = ?")
+					CheckErr(err)
+					_, err = stmt.Exec(sessionToken, uid)
+					CheckErr(err)
+
+					MAINPAGEDATA = MainPage{
+						Message:   "Successfully logged in!",
+						AlertType: "Login",
+					}
+
+					http.Redirect(w, r, "/", 302)
+					db.Close()
+				} else {
+					loginData.Login = login
+					loginData.LoginErr = false
+					loginData.PassErr = true
+				}
+			} else {
+				loginData.Login = ""
+				loginData.LoginErr = true
+				loginData.PassErr = false
+			}
+		}
+
+		if err := templ.Execute(w, loginData); err != nil {
+			panic(err)
+		}
 	}
 }
 
-func LoadRegistrationPage(data Registration) http.HandlerFunc {
+func LoadRegistrationPage(data *Registration) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		templ, _ := template.ParseFiles("templates/registration.html")
+
+		if r.Method == "GET" {
+			ReturnWithCookie(r, w, "register")
+		}
 
 		data.NameErr = false
 		data.EmailErr = false
@@ -77,8 +172,8 @@ func LoadRegistrationPage(data Registration) http.HandlerFunc {
 			CheckErr(err)
 
 			// Checks if data is already taken
-			freeUserName := DataExists(db, data.Username, "username")
-			freeEmail := DataExists(db, data.Email, "email")
+			_, freeUserName := DataExists(db, data.Username, "username")
+			_, freeEmail := DataExists(db, data.Email, "email")
 
 			if freeUserName || freeEmail {
 				if freeUserName {
@@ -87,7 +182,6 @@ func LoadRegistrationPage(data Registration) http.HandlerFunc {
 				if freeEmail {
 					data.EmailErr = true
 				}
-				data.Success = false
 			} else {
 				stmt, err := db.Prepare("INSERT INTO users(username, email, password, date, role, ip) values(?,?,?,?,?,?)")
 				CheckErr(err)
@@ -95,14 +189,65 @@ func LoadRegistrationPage(data Registration) http.HandlerFunc {
 				_, err = stmt.Exec(data.Username, data.Email, password, date, role, ip)
 				CheckErr(err)
 
-				data.Success = true
+				sessionToken := CreateSessionToken(w)
+				stmt, err = db.Prepare("UPDATE users SET session_token = ? WHERE username = ?")
+				CheckErr(err)
+				_, err = stmt.Exec(sessionToken, data.Username)
+				CheckErr(err)
+
+				MAINPAGEDATA = MainPage{
+					Message:   "Account successfully created!",
+					AlertType: "Register",
+				}
+
 				http.Redirect(w, r, "/", 302)
 				db.Close()
 			}
 		}
 
-		ExecuteTempl(templ, w, data)
+		ExecuteTempl(templ, w, *data)
 	}
+}
+
+func ReturnWithCookie(r *http.Request, w http.ResponseWriter, from string) {
+	c, err := r.Cookie("session_token")
+
+	if err == nil {
+		db, err := sql.Open("sqlite3", "./db/users.db")
+		CheckErr(err)
+
+		_, checkResult := DataExists(db, c.Value, "session_token")
+		db.Close()
+
+		if checkResult {
+			if from == "login" {
+				MAINPAGEDATA = MainPage{
+					Message:   "You are already logged in!",
+					AlertType: "AlreadyLoged",
+				}
+			} else {
+				MAINPAGEDATA = MainPage{
+					Message:   "You are already registered and logged in!",
+					AlertType: "AlreadyRegistered",
+				}
+			}
+
+			http.Redirect(w, r, "/", 302)
+		} else {
+			w.WriteHeader(http.StatusBadRequest)
+		}
+	}
+}
+
+func CreateSessionToken(w http.ResponseWriter) string {
+	sessionToken := uuid.NewV4().String()
+
+	http.SetCookie(w, &http.Cookie{
+		Name:    "session_token",
+		Value:   sessionToken,
+		Expires: COOKIETIME,
+	})
+	return sessionToken
 }
 
 func GetHash(pwd []byte) string {
@@ -113,16 +258,17 @@ func GetHash(pwd []byte) string {
 	return string(hash)
 }
 
-func DataExists(db *sql.DB, data string, dataType string) bool {
-	sqlStmt := "SELECT " + dataType + " FROM users WHERE " + dataType + " = ?"
-	err := db.QueryRow(sqlStmt, data).Scan(&data)
+func DataExists(db *sql.DB, data string, dataType string) (int, bool) {
+	var uid int
+	sqlStmt := "SELECT " + dataType + ", uid FROM users WHERE " + dataType + " = ?"
+	err := db.QueryRow(sqlStmt, data).Scan(&data, &uid)
 	if err != nil {
 		if err != sql.ErrNoRows {
 			log.Print(err)
 		}
-		return false
+		return -1, false
 	}
-	return true
+	return uid, true
 }
 
 func ExecuteTempl(templ *template.Template, w http.ResponseWriter, data Registration) {

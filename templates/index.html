@@ -6,16 +6,30 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="/css/index.css"/>
+  <script type="text/javascript" src="/js/index.js"></script>
   <title>Forum</title>
 </head>
-<body>
-  <div class="buttons-section">
-    <div class="login-button">
-      <button onclick="window.location.href='/login';">Login</button>
+<body onload="GenerateAlertBox(registrationSuccess, alertMessage)">
+  <div class="header-section">
+    <div class="alert-section">
+      <div style="display: none" name="alert" onclick="this.parentElement.style.display='none';">
+        <h1 class="alert" style="font-size: 20px;" name="alert-text">Account successfully created!</h1>
+      </div>
     </div>
-    <div class="registration-button">
-      <button onclick="window.location.href='/registration';">Registration</button>
+  </div>
+  <div class="main-section">
+    <div class="buttons-section">
+      <div class="login-button">
+        <button onclick="window.location.href='/login';">Login</button>
+      </div>
+      <div class="registration-button">
+        <button onclick="window.location.href='/registration';">Registration</button>
+      </div>
     </div>
   </div>
 </body>
+<script>
+  var registrationSuccess = "{{.AlertType}}"
+  var alertMessage = "{{.Message}}"
+</script>
 </html>

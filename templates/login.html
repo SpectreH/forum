@@ -1,13 +1,37 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-  <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
   <meta charset="UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="/css/login.css" />
+  <script type="text/javascript" src="/js/login.js"></script>
   <title>Forum - login</title>
 </head>
-<body>
-  
+<body onload="ReturnData(loginErr, passErr, login)">
+  <div class="login-wrap">
+    <div class="login-seciton">
+      <h1 class="login-header">Login</h1>
+      <form method="post" id="login-form" class="login-form">
+        <p class="form-element" style="margin-top: 0px;">
+          <label for="login">Username/Email:</label><br>
+          <input type="text" id="login" name="login" value="" required><br>
+          <span class="error-notification" id="login"></span>
+        </p>
+        <p class="form-element" style="margin-bottom: 30px;">
+          <label for="pass">Password:</label><br>
+          <input type="password" id="pass" name="password" value="" required><br>
+          <span class="error-notification" id="password"></span>
+        </p>
+        <input type="submit" value="Login">
+      </form>
+    </div>
+  </div>
 </body>
+<script>
+  var loginErr = "{{.LoginErr}}"
+  var passErr = "{{.PassErr}}"
+  var login = "{{.Login}}"
+</script>
 </html>
