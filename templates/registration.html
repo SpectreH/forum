@@ -1,14 +1,14 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
   <meta charset="UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="/css/style.css"/>
+  <link rel="stylesheet" href="/css/registration.css"/>
+  <script type="text/javascript" src="/js/registration.js"></script>
   <title>Forum - registration</title>
 </head>
-<body onload="ReturnData()">
+<body onload="ReturnData(nameError, emailError, username, email)">
   <div class="registration-wrap">
     <div class="registration-seciton">
       <h1 class="registration-header">Registration</h1>
@@ -31,28 +31,11 @@
       </form>
     </div>
   </div>
+</body>
 <script>
   var nameError = "{{.NameErr}}"
   var emailError = "{{.EmailErr}}"
-  function ReturnData() {
-    if (nameError == "true" || emailError == "true") {
-        document.getElementById("username").value = "{{.Username}}"
-        document.getElementById("email").value = "{{.Email}}"
-    }
-
-    if (nameError == "true") {
-      document.getElementsByTagName("span").namedItem("name").innerHTML = "Username is already taken"
-      document.getElementsByTagName("input").namedItem("username").style.boxShadow = "0 0 6px #d45252"
-      document.getElementsByTagName("input").namedItem("username").style.borderColor = "#d45252"
-    }
-
-    if (emailError == "true") {
-      console.log(document.getElementsByClassName("error-notification").value)
-      document.getElementsByTagName("span").namedItem("email").innerHTML = "Email is already registered"
-      document.getElementsByTagName("input").namedItem("email").style.boxShadow = "0 0 6px #d45252"
-      document.getElementsByTagName("input").namedItem("email").style.borderColor = "#d45252"
-    }
-  }
+  var username = "{{.Username}}"
+  var email = "{{.Email}}"
 </script>
-</body>
 </html>
