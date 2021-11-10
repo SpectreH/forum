@@ -30,14 +30,12 @@ type Login struct {
 type MainPage struct {
 	Message   string
 	AlertType string
+	LoggedIn  bool
 }
 
-var COOKIETIME time.Time
 var MAINPAGEDATA MainPage
 
 func main() {
-	COOKIETIME = time.Now().Add(120 * time.Second)
-
 	data := Registration{
 		NameErr:  false,
 		EmailErr: false,
@@ -54,6 +52,7 @@ func main() {
 	MAINPAGEDATA = MainPage{
 		Message:   "",
 		AlertType: "",
+		LoggedIn:  false,
 	}
 
 	css := http.FileServer(http.Dir("css"))
@@ -63,6 +62,7 @@ func main() {
 	http.Handle("/js/", http.StripPrefix("/js/", js))
 
 	http.HandleFunc("/", LoadMainPage())
+	http.HandleFunc("/logout", LogOut())
 	http.HandleFunc("/login", LoadLoginPage(&loginData))
 	http.HandleFunc("/registration", LoadRegistrationPage(&data))
 	http.HandleFunc("/exit", ShutdownServer)
@@ -73,9 +73,37 @@ func main() {
 	}
 }
 
+func LogOut() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if CheckForCookies(r, w) {
+			c := http.Cookie{
+				Name:   "session_token",
+				MaxAge: -1}
+			http.SetCookie(w, &c)
+
+			MAINPAGEDATA = MainPage{
+				Message:   "You have successfully logged out!",
+				AlertType: "Logout",
+			}
+		}
+
+		templ, _ := template.ParseFiles("templates/main.html")
+		if err := templ.Execute(w, MAINPAGEDATA); err != nil {
+			panic(err)
+		}
+
+		MAINPAGEDATA = MainPage{
+			Message:   "",
+			AlertType: "",
+		}
+	}
+}
+
 func LoadMainPage() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		templ, _ := template.ParseFiles("templates/index.html")
+		templ, _ := template.ParseFiles("templates/main.html")
+
+		CheckForCookies(r, w)
 
 		if err := templ.Execute(w, MAINPAGEDATA); err != nil {
 			panic(err)
@@ -93,7 +121,14 @@ func LoadLoginPage(loginData *Login) http.HandlerFunc {
 		templ, _ := template.ParseFiles("templates/login.html")
 
 		if r.Method == "GET" {
-			ReturnWithCookie(r, w, "login")
+			if CheckForCookies(r, w) {
+				MAINPAGEDATA = MainPage{
+					Message:   "You are already logged in!",
+					AlertType: "AlreadyLoged",
+				}
+
+				http.Redirect(w, r, "/", 302)
+			}
 		}
 
 		if r.Method == "POST" {
@@ -119,6 +154,7 @@ func LoadLoginPage(loginData *Login) http.HandlerFunc {
 					loginData.PassErr = false
 
 					sessionToken := CreateSessionToken(w)
+
 					stmt, err := db.Prepare("UPDATE users SET session_token = ? WHERE uid = ?")
 					CheckErr(err)
 					_, err = stmt.Exec(sessionToken, uid)
@@ -154,7 +190,14 @@ func LoadRegistrationPage(data *Registration) http.HandlerFunc {
 		templ, _ := template.ParseFiles("templates/registration.html")
 
 		if r.Method == "GET" {
-			ReturnWithCookie(r, w, "register")
+			if CheckForCookies(r, w) {
+				MAINPAGEDATA = MainPage{
+					Message:   "You are already registered and logged in!",
+					AlertType: "AlreadyRegistered",
+				}
+
+				http.Redirect(w, r, "/", 302)
+			}
 		}
 
 		data.NameErr = false
@@ -190,6 +233,7 @@ func LoadRegistrationPage(data *Registration) http.HandlerFunc {
 				CheckErr(err)
 
 				sessionToken := CreateSessionToken(w)
+
 				stmt, err = db.Prepare("UPDATE users SET session_token = ? WHERE username = ?")
 				CheckErr(err)
 				_, err = stmt.Exec(sessionToken, data.Username)
@@ -209,7 +253,7 @@ func LoadRegistrationPage(data *Registration) http.HandlerFunc {
 	}
 }
 
-func ReturnWithCookie(r *http.Request, w http.ResponseWriter, from string) {
+func CheckForCookies(r *http.Request, w http.ResponseWriter) bool {
 	c, err := r.Cookie("session_token")
 
 	if err == nil {
@@ -220,32 +264,25 @@ func ReturnWithCookie(r *http.Request, w http.ResponseWriter, from string) {
 		db.Close()
 
 		if checkResult {
-			if from == "login" {
-				MAINPAGEDATA = MainPage{
-					Message:   "You are already logged in!",
-					AlertType: "AlreadyLoged",
-				}
-			} else {
-				MAINPAGEDATA = MainPage{
-					Message:   "You are already registered and logged in!",
-					AlertType: "AlreadyRegistered",
-				}
-			}
-
-			http.Redirect(w, r, "/", 302)
+			MAINPAGEDATA.LoggedIn = true
+			return true
 		} else {
 			w.WriteHeader(http.StatusBadRequest)
 		}
 	}
+
+	MAINPAGEDATA.LoggedIn = false
+	return false
 }
 
 func CreateSessionToken(w http.ResponseWriter) string {
 	sessionToken := uuid.NewV4().String()
+	MAINPAGEDATA.LoggedIn = true
 
 	http.SetCookie(w, &http.Cookie{
 		Name:    "session_token",
 		Value:   sessionToken,
-		Expires: COOKIETIME,
+		Expires: time.Now().Add(20 * time.Second),
 	})
 	return sessionToken
 }
