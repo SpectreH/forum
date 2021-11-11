@@ -91,15 +91,7 @@ func LogOut(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	templ, _ := template.ParseFiles("templates/main.html")
-	if err := templ.Execute(w, MAINPAGEDATA); err != nil {
-		panic(err)
-	}
-
-	MAINPAGEDATA = MainPage{
-		Message:   "",
-		AlertType: "",
-	}
+	http.Redirect(w, r, "/", 302)
 }
 
 func LoadMainPage(w http.ResponseWriter, r *http.Request) {

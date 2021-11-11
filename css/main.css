@@ -2,8 +2,17 @@
     font: 100% -apple-system,'BlinkMacSystemFont','Segoe UI','Roboto','Helvetica','Arial',sans-serif,'Apple Color Emoji','Segoe UI Emoji','Segoe UI Symbol';
 }
 
-.header-main {
+a {
+    text-decoration: none;
+    font-weight: bold;
+    color: #3d8a3f;
+}
+
+/* Header section */
+
+.header-block {
     color: black;
+    background: #fff;
   
     display: flex;
     -webkit-box-pack: center;
@@ -110,4 +119,109 @@
     justify-content: center;
     align-items: center;
     text-align: center;
+}
+
+/* Posts Section */
+
+.content-block {
+    display: grid;
+    justify-content: center;
+}
+
+.content {
+    width: 600px;
+    float: left;
+    margin: 5px 5px 0 5px;
+    border: 1px solid #dfdfdf;
+    background: #fff;
+    padding: 25px;
+}
+
+.content-header {
+    text-align: center;
+    font-size: 24px;
+}
+
+/* Exact-Post sections */
+
+.content-post {
+    border-bottom: 1px solid #dfdfdf;
+    padding: 0 0 35px;
+    margin: 0 0 35px;
+}
+
+.post-entry-title-text {
+    text-decoration: none;
+    color: #464646;
+    
+    font-size: 24px;
+    line-height: 36px;
+    font-weight: 700 !important;
+}
+
+.post-entry-info {
+    font-size: 15px;
+    color: #999;
+    margin: 0 0 15px;
+}
+
+.post-entry-content {
+    display: flex;
+    margin: 10px 0 0;
+}
+
+.post-entry-content-image-link {
+    align-self: center;
+}
+
+.post-entry-content-text {
+    font-size: 16px;
+    line-height: 1.8em;
+    padding: 0 25px;
+}
+
+/* Category section */
+
+.post-entry-categories-header {
+    text-align: center;
+    font-size: 17px;
+    color: #999;
+    margin: 10px 0;
+
+}
+
+.category-box {
+    border: 1px solid #cccccc;
+    background-color: #dfdfdf;
+    padding: 0 5px;
+    height: fit-content;
+}
+
+.category-box:hover {
+    border: 1px solid #afafaf;
+    background-color: #aaa9a9;
+    padding: 0 5px;
+    height: fit-content;
+}
+
+.category-box[type="show-more"] {
+    border: 1px solid #77cc66;
+    background-color: #c7f2a3
+}
+
+.category-box:hover[type="show-more"] {
+    border: 1px solid #77cc66;
+    background-color: rgb(108, 202, 89);
+}
+
+.post-entry-categories {
+    justify-content: center;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 7px;
+}
+
+a[type="category"] {
+    font-weight: 500;
+    color: #464646;
 }

@@ -1,20 +1,26 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="/css/main.css"/>
+    <link rel="stylesheet" href="/css/main.css" />
     <script type="text/javascript" src="/js/main.js"></script>
     <title>Forum - Main</title>
 </head>
-<body style="margin: 0;" onload="InitMainPage(loggedIn, messageType, alertMessage); ">
-    <header class="header-main">
+
+<body style="margin: 0; background: #f0f0f0;" onload="InitMainPage(loggedIn, messageType, alertMessage); ">
+    <header class="header-block">
         <nav class="header-nav">
             <a href="/" class="header-link">
                 <svg width="64" height="64" fill="none" style="fill: rgb(51, 51, 51);">
-                    <path fill-rule="evenodd" clip-rule="evenodd" d="M20 32C28.8366 32 36 26.6274 36 20C36 13.3726 28.8366 8 20 8C11.1634 8 4 13.3726 4 20C4 22.6842 5.17509 25.1626 7.16049 27.1616C6.35561 29.4537 5.31284 31.1723 4.6499 32.1319C4.4071 32.4834 4.65714 32.9802 5.08289 32.9453C6.78453 32.8058 10.1224 32.3105 12.3741 30.5519C14.6411 31.4754 17.2389 32 20 32Z" fill="#333333"/>
-                    <path fill-rule="evenodd" clip-rule="evenodd" d="M22.7843 33.8337C31.4033 32.7928 38 26.9957 38 20.0002C38 19.4632 37.9611 18.9333 37.8855 18.4121C41.5534 20.1003 44 23.136 44 26.6002C44 28.7476 43.0599 30.7303 41.4716 32.3295C42.068 34.0278 42.8276 35.3325 43.3579 36.1259C43.5953 36.481 43.3423 36.9779 42.917 36.9372C41.5041 36.8021 39.0109 36.3773 37.3007 35.0418C35.4872 35.7806 33.4089 36.2002 31.2 36.2002C27.9781 36.2002 25.0343 35.3074 22.7843 33.8337Z" fill="#333333"/>
+                    <path fill-rule="evenodd" clip-rule="evenodd"
+                        d="M20 32C28.8366 32 36 26.6274 36 20C36 13.3726 28.8366 8 20 8C11.1634 8 4 13.3726 4 20C4 22.6842 5.17509 25.1626 7.16049 27.1616C6.35561 29.4537 5.31284 31.1723 4.6499 32.1319C4.4071 32.4834 4.65714 32.9802 5.08289 32.9453C6.78453 32.8058 10.1224 32.3105 12.3741 30.5519C14.6411 31.4754 17.2389 32 20 32Z"
+                        fill="#333333" />
+                    <path fill-rule="evenodd" clip-rule="evenodd"
+                        d="M22.7843 33.8337C31.4033 32.7928 38 26.9957 38 20.0002C38 19.4632 37.9611 18.9333 37.8855 18.4121C41.5534 20.1003 44 23.136 44 26.6002C44 28.7476 43.0599 30.7303 41.4716 32.3295C42.068 34.0278 42.8276 35.3325 43.3579 36.1259C43.5953 36.481 43.3423 36.9779 42.917 36.9372C41.5041 36.8021 39.0109 36.3773 37.3007 35.0418C35.4872 35.7806 33.4089 36.2002 31.2 36.2002C27.9781 36.2002 25.0343 35.3074 22.7843 33.8337Z"
+                        fill="#333333" />
                 </svg>
             </a>
             <ul class="header-list" id="header-list" style="display: none;">
@@ -32,17 +38,70 @@
         </nav>
     </header>
     <div class="header-line"></div>
-    <section class="hero">
+    <section class="hero-block">
         <div class="alert-section">
             <div style="display: none" name="alert" onclick="this.parentElement.style.display='none';">
-            <h1 class="alert" style="font-size: 20px;" name="alert-text">Account successfully created!</h1>
+                <h1 class="alert" style="font-size: 20px;" name="alert-text"></h1>
             </div>
         </div>
     </section>
+    <section class="content-block">
+        <div class="content"> 
+            <article class="content-post">
+                <header class="post-entry-header">
+                    <h2 class="post-entry-title">
+                        <a class="post-entry-title-text" href="">How to Easily Update URLs When Moving Your WordPress Site</a>
+                    </h2>
+                </header>
+                <div class="post-entry-info">
+                    Posted on
+                    <time itemprop="datePublished" datetime="2021-11-11T06:30:18+00:00">November 11th, 2021</time>
+                    by
+                    <a class="post-entry-info-author" href="https://www.wpbeginner.com/author/wpbeginner/"
+                        title="Posts by Editorial Staff" rel="author">Editorial Staff</a>
+                </div>
+                <div class="post-entry-content">
+                    <a class="post-entry-content-image-link" href="#" aria-hidden="true">
+                        <img width="180" height="180"
+                            src="https://pbs.twimg.com/profile_images/866895795332710401/UJfny__l_400x400.jpg" class="asdf"
+                            alt="asdf" itemprop="image">
+                    </a>
+                    <p class="post-entry-content-text">Do you want to update URLs after moving your WordPress site? It can be pretty
+                        time-consuming to
+                        manually edit each
+                        post or page just to replace old URLs. Luckily, there are WordPress plugin that help you automate
+                        the process of
+                        updating old URLs. In this…&nbsp;
+                        <strong> <a href="#">Read More »</a> </strong>
+                    </p>
+                </div>
+                <div class="post-entry-categories-section">
+                <div class="post-entry-categories-header">Categories</div>
+                <div class="post-entry-categories">
+                    <div class="category-box" style="display: none;"><a type="category" rel="nofollow" href="#">Crime</a></div>
+                    <div class="category-box" style="display: none;"><a type="category" rel="nofollow" href="#">Politic</a></div>
+                    <div class="category-box" style="display: none;"><a type="category" rel="nofollow" href="#">Programming</a></div>
+                    <div class="category-box" style="display: none;"><a type="category" rel="nofollow" href="#">Game-Desing</a></div>
+                    <div class="category-box" style="display: none;"><a type="category" rel="nofollow" href="#">News</a></div>
+                    <div class="category-box" style="display: none;"><a type="category" rel="nofollow" href="#">English</a></div>
+                    <div class="category-box" style="display: none;"><a type="category" rel="nofollow" href="#">Crime</a></div>
+                    <div class="category-box" style="display: none;"><a type="category" rel="nofollow" href="#">Politic</a></div>
+                    <div class="category-box" style="display: none;"><a type="category" rel="nofollow" href="#">Programming</a></div>
+                    <div class="category-box" style="display: none;"><a type="category" rel="nofollow" href="#">Game-Desing</a></div>
+                    <div class="category-box" style="display: none;"><a type="category" rel="nofollow" href="#">News</a></div>
+                    <div class="category-box" style="display: none;"><a type="category" rel="nofollow" href="#">English</a></div>
+                </div>
+                </div>
+                <footer class="post-entry-footer"></footer>
+            </article>
+        </div>
+    </section>
 </body>
+
 <script>
     var loggedIn = "{{.LoggedIn}}"
     var messageType = "{{.AlertType}}"
     var alertMessage = "{{.Message}}"
-  </script>
+</script>
+
 </html>
