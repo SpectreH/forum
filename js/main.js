@@ -1,6 +1,8 @@
 function InitMainPage(loggedIn, messageType, alertMessage) {
   GenerateAlertBox(messageType, alertMessage)
 
+  document.getElementById("header-list").style.display = "flex";
+
   if (loggedIn == "true") {
     ChangeButtons()
   }

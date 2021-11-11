@@ -8,7 +8,7 @@
     <script type="text/javascript" src="/js/main.js"></script>
     <title>Forum - Main</title>
 </head>
-<body style="margin: 0;" onload="InitMainPage(loggedIn, messageType, alertMessage)">
+<body style="margin: 0;" onload="InitMainPage(loggedIn, messageType, alertMessage); ">
     <header class="header-main">
         <nav class="header-nav">
             <a href="/" class="header-link">
@@ -17,7 +17,7 @@
                     <path fill-rule="evenodd" clip-rule="evenodd" d="M22.7843 33.8337C31.4033 32.7928 38 26.9957 38 20.0002C38 19.4632 37.9611 18.9333 37.8855 18.4121C41.5534 20.1003 44 23.136 44 26.6002C44 28.7476 43.0599 30.7303 41.4716 32.3295C42.068 34.0278 42.8276 35.3325 43.3579 36.1259C43.5953 36.481 43.3423 36.9779 42.917 36.9372C41.5041 36.8021 39.0109 36.3773 37.3007 35.0418C35.4872 35.7806 33.4089 36.2002 31.2 36.2002C27.9781 36.2002 25.0343 35.3074 22.7843 33.8337Z" fill="#333333"/>
                 </svg>
             </a>
-            <ul class="header-list" id="header-list">
+            <ul class="header-list" id="header-list" style="display: none;">
                 <li class="header-list-element" id="login-element">
                     <a href="/login" class="header-list-element-link" id="login-link">
                         <span class="header-list-element-link-border" name="login/account">Login</span>
