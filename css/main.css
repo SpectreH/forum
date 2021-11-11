@@ -100,9 +100,15 @@ a {
 
 /* Alert section */
 
-.alert-section {
+.hero-block {
     width: 100%;
-    margin-top: 5vw;
+    height: 100px;
+}
+
+.alert-section {
+    margin: 5px 0;
+    width: 100%;
+    height: 100%;
     display: inline-flex;
     justify-content: center;
     align-items: center;
@@ -119,6 +125,8 @@ a {
     justify-content: center;
     align-items: center;
     text-align: center;
+
+    padding: 0 20px;    
 }
 
 /* Posts Section */

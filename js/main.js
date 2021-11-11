@@ -12,7 +12,8 @@ function InitMainPage(loggedIn, messageType, alertMessage) {
 function ChangeButtons() {
   document.getElementsByTagName("span").namedItem("login/account").innerHTML = "Account"
   document.getElementById("login-link").href = "/account"
-  document.getElementById("registration-element").remove();
+  document.getElementsByTagName("span").namedItem("registration").innerHTML = "New Post"
+  document.getElementById("registration-link").href = "/new"
 
   CreateLogOutButton()
 }
@@ -32,7 +33,7 @@ function CreateLogOutButton() {
   span.setAttribute('name',"logout");
   span.setAttribute('type',"logout");
 
-  const node = document.createTextNode("Log out");
+  const node = document.createTextNode("Log Out");
   span.appendChild(node);
   a.appendChild(span)
   li.appendChild(a)
@@ -45,7 +46,7 @@ function GenerateAlertBox(messageType, alertMessage) {
   if (messageType != "") {
     element = document.getElementsByTagName("div").namedItem("alert");
     document.getElementsByTagName("h1").namedItem("alert-text").innerHTML = alertMessage;
-    element.style.display = "block";
+    element.style.display = "flex";
 
     if (messageType != "Login" && messageType  != "Register" && messageType  != "Logout") {
       document.getElementsByTagName("h1").namedItem("alert-text").style.backgroundColor = "rgba(211, 10, 10, 0.85)";
@@ -103,8 +104,8 @@ function ShowAllCategories(element) {
 
 function AlerFadeOut(element) {
   var op = 1;  // initial opacity
-  element.style.display = 'block';
   var timer = setInterval(function () {
+
     if (op <= 0.01) {
       clearInterval(timer);
       element.style.display = "none";
