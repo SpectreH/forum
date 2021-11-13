@@ -1,11 +1,25 @@
 * {
     font: 100% -apple-system,'BlinkMacSystemFont','Segoe UI','Roboto','Helvetica','Arial',sans-serif,'Apple Color Emoji','Segoe UI Emoji','Segoe UI Symbol';
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
 }
 
 a {
     text-decoration: none;
     font-weight: bold;
     color: #3d8a3f;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    color: #333;
+    line-height: 1.5;
+    margin: 0 0 16px;  
+}
+
+h3 {
+    font-size: 24px;
+    font-weight: 700;
 }
 
 /* Header section */
@@ -71,7 +85,9 @@ a {
     font-weight: 700;
 }
 
-.header-list-element-link-border {
+/* Buttons sections */
+
+.header-list-element-link-border, .new-comment-submit {
     margin: 0px;
     border-radius: 0.5rem;
     padding: 0.5rem 1rem;
@@ -82,11 +98,15 @@ a {
     transition: all 0.1s ease 0s;
 }
 
-.header-list-element-link-border:hover {
+.header-list-element-link-border:hover, .new-comment-submit:hover {
     border: 1px solid transparent;
     background: #4CAF50;
     color: rgb(255, 255, 255);
     width: calc(50% + 12px);
+}
+
+.new-comment-submit:hover {
+    width: 88px;
 }
 
 .header-list-element-link-border[type="logout"] {
@@ -190,7 +210,7 @@ a {
 
 /* Category section */
 
-.post-entry-categories-header {
+.post-entry-categories-header, .post-categories-header {
     text-align: center;
     font-size: 17px;
     color: #999;
@@ -222,7 +242,7 @@ a {
     background-color: rgb(108, 202, 89);
 }
 
-.post-entry-categories {
+.post-entry-categories, .post-categories {
     justify-content: center;
     display: flex;
     flex-wrap: wrap;

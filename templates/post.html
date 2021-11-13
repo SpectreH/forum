@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="/css/main.css" />
+  <link rel="stylesheet" href="/css/post.css" />
+  <script type="text/javascript" src="/js/main.js"></script>
+  <title>Forum - Main</title>
+</head>
+
+<body style="margin: 0; background: #f0f0f0;" onload="InitMainPage(loggedIn, messageType, alertMessage); ">
+  <header class="header-block">
+    <nav class="header-nav">
+      <a href="/" class="header-link">
+        <svg width="64" height="64" fill="none" style="fill: rgb(51, 51, 51);">
+          <path fill-rule="evenodd" clip-rule="evenodd"
+            d="M20 32C28.8366 32 36 26.6274 36 20C36 13.3726 28.8366 8 20 8C11.1634 8 4 13.3726 4 20C4 22.6842 5.17509 25.1626 7.16049 27.1616C6.35561 29.4537 5.31284 31.1723 4.6499 32.1319C4.4071 32.4834 4.65714 32.9802 5.08289 32.9453C6.78453 32.8058 10.1224 32.3105 12.3741 30.5519C14.6411 31.4754 17.2389 32 20 32Z"
+            fill="#333333" />
+          <path fill-rule="evenodd" clip-rule="evenodd"
+            d="M22.7843 33.8337C31.4033 32.7928 38 26.9957 38 20.0002C38 19.4632 37.9611 18.9333 37.8855 18.4121C41.5534 20.1003 44 23.136 44 26.6002C44 28.7476 43.0599 30.7303 41.4716 32.3295C42.068 34.0278 42.8276 35.3325 43.3579 36.1259C43.5953 36.481 43.3423 36.9779 42.917 36.9372C41.5041 36.8021 39.0109 36.3773 37.3007 35.0418C35.4872 35.7806 33.4089 36.2002 31.2 36.2002C27.9781 36.2002 25.0343 35.3074 22.7843 33.8337Z"
+            fill="#333333" />
+        </svg>
+      </a>
+      <ul class="header-list" id="header-list" style="display: none;">
+        <li class="header-list-element" id="login-element">
+          <a href="/login" class="header-list-element-link" id="login-link">
+            <span class="header-list-element-link-border" name="login/account">Login</span>
+          </a>
+        </li>
+        <li class="header-list-element" id="registration-element">
+          <a href="/registration" class="header-list-element-link" id="registration-link">
+            <span class="header-list-element-link-border" name="registration">Register</span>
+          </a>
+        </li>
+      </ul>
+    </nav>
+  </header>
+  <div class="header-line"></div>
+  <section class="hero-block">
+    <div class="alert-section">
+      <div style="display: none; width: fit-content;" name="alert" onclick="this.style.display='none';">
+        <h1 class="alert" style="font-size: 20px;" name="alert-text"></h1>
+      </div>
+    </div>
+  </section>
+  <section class="content-block">
+    <div class="content-area">
+      <section class="post-main-section">
+        <article class="post" aria-label="How to Set Up an Auto Attendant Phone System for Your Website">
+          <header class="post-header">
+            <h1 class="post-title">How to Set Up an Auto Attendant Phone System for Your Website</h1>
+            <p class="post-meta">
+              Posted on 
+              <time itemprop="datePublished" datetime="2021-11-09T06:00:06-05:00">November 9th, 2021</time> 
+              by 
+              <a href="https://www.wpbeginner.com/author/wpbeginner/">Editorial Staff</a>
+            </p>
+          </header>
+          <div class="post-content">
+            <p>
+              Do you want to set up an auto attendant phone system for your website?
+
+              For business owners, an auto attendant phone system can cut costs, help you answer calls faster, improve customer
+              service, and make your small business look more professional.
+            </p>
+          </div>
+          <div class="post-catregories-section">
+            <div class="post-categories-header">Categories</div>
+            <div class="post-categories">
+              <div class="category-box"><a type="category" rel="nofollow" href="#">Crime</a></div>
+              <div class="category-box"><a type="category" rel="nofollow" href="#">Politic</a></div>
+              <div class="category-box"><a type="category" rel="nofollow" href="#">Programming</a></div>
+              <div class="category-box"><a type="category" rel="nofollow" href="#">Game-Desing</a></div>
+              <div class="category-box"><a type="category" rel="nofollow" href="#">News</a></div>
+              <div class="category-box"><a type="category" rel="nofollow" href="#">English</a></div>
+              <div class="category-box"><a type="category" rel="nofollow" href="#">Crime</a></div>
+              <div class="category-box"><a type="category" rel="nofollow" href="#">Politic</a></div>
+              <div class="category-box"><a type="category" rel="nofollow" href="#">Programming</a></div>
+              <div class="category-box"><a type="category" rel="nofollow" href="#">Game-Desing</a></div>
+              <div class="category-box"><a type="category" rel="nofollow" href="#">News</a></div>
+              <div class="category-box"><a type="category" rel="nofollow" href="#">English</a></div>
+            </div>
+          </div>
+        </article>
+      </section>
+      <section class="post-new-comment-section">
+        <div class="login-message">
+          <h1 class="new-comment-login" style="display: none;">Login to add new comment!</h1>
+        </div>
+        <div class="new-comment">
+          <h3>
+            <svg width="24px" height="24px" viewBox="0 0 477.381 477.382">
+              <path d="M477.381,103.373c0-54.988-44.577-99.564-99.565-99.564c-53.146,0-96.562,41.64-99.413,94.074
+              c-13.35-2.513-27.168-3.838-41.322-3.838c-113.595,0-205.681,84.96-205.681,189.764c0,28.472,6.81,55.472,18.986,79.71
+              L1.735,451.491c-2.703,4.889-2.215,10.917,1.239,15.308c2.673,3.397,6.721,5.3,10.911,5.3c1.223,0,2.457-0.163,3.674-0.498
+              l106.506-29.233c32.435,19.721,71.269,31.206,113.016,31.206c113.594,0,205.681-84.96,205.681-189.764
+              c0-32.378-8.8-62.854-24.3-89.521C453.186,178.737,477.381,143.881,477.381,103.373z M377.816,177.937
+              c-41.115,0-74.565-33.449-74.565-74.564c0-41.115,33.45-74.564,74.565-74.564s74.565,33.449,74.565,74.564
+              C452.381,144.487,418.931,177.937,377.816,177.937z" />
+              <path d="M419.955,92.871h-31.636V61.233c0-5.801-4.703-10.503-10.503-10.503c-5.799,0-10.502,4.702-10.502,10.503V92.87h-31.636
+              c-5.802,0-10.503,4.702-10.503,10.503c0,5.8,4.701,10.502,10.503,10.502h31.636v31.636c0,5.801,4.703,10.503,10.502,10.503
+              c5.801,0,10.503-4.702,10.503-10.503v-31.636h31.636c5.802,0,10.503-4.702,10.503-10.502
+              C430.458,97.572,425.755,92.871,419.955,92.871z" />
+            </svg>
+            Leave a comment
+          </h3>
+          <form class="new-comment-form" action="#" method="post">
+            <div>
+              <textarea class="new-comment-textarea" name="comments" id="comments"></textarea>
+            </div>
+            <input class="new-comment-submit" style="width: fit-content;" type="submit" value="Submit">
+          </form>
+        </div>
+      </section>
+      <section class="post-comments-section">
+          <div class="post-comments">
+            <h3>
+              <svg width="24px" height="24px" viewBox="0 0 24 24">
+                <path
+                  d="M17,9H7a1,1,0,0,0,0,2H17a1,1,0,0,0,0-2Zm-4,4H7a1,1,0,0,0,0,2h6a1,1,0,0,0,0-2ZM12,2A10,10,0,0,0,2,12a9.89,9.89,0,0,0,2.26,6.33l-2,2a1,1,0,0,0-.21,1.09A1,1,0,0,0,3,22h9A10,10,0,0,0,12,2Zm0,18H5.41l.93-.93a1,1,0,0,0,0-1.41A8,8,0,1,1,12,20Z" />
+              </svg>
+              124 Comments
+            </h3>
+            <ol class="comment-list">
+              <li class="comment">
+                <article class="comment-article">
+                  <header class="comment-header">
+                    <p class="comment-author">
+                      <span class="comment-author-name" itemprop="name">Eric B</span>
+                    </p>
+                    <p class="comment-meta">
+                      <time class="comment-time" datetime="2020-05-04T18:46:33-04:00" itemprop="datePublished">
+                        <a class="comment-time-link"
+                          href="https://www.wpbeginner.com/plugins/how-to-update-urls-when-moving-your-wordpress-site/comment-page-2/#comment-852546"
+                          itemprop="url">May 4, 2020 at 6:46 pm
+                        </a>
+                      </time>
+                    </p>
+                  </header>
+                  <div class="comment-content">
+                    <p>
+                      WOW!! This was incredibly easy and fast. I am blown away on how seamless this was. Thank you for sharing!
+                    </p>
+                  </div>
+                </article>
+              </li>
+            </ol>
+          </div>
+      </section>
+    </div>
+  </section>
+</body>
+<script>
+  var loggedIn = "{{.LoggedIn}}"
+  var messageType = "{{.AlertType}}"
+  var alertMessage = "{{.Message}}"
+</script>
+</html>
