@@ -261,6 +261,10 @@ func LoadRegistrationPage(w http.ResponseWriter, r *http.Request) {
 func LoadPostPage(w http.ResponseWriter, r *http.Request) {
 	templ, _ := template.ParseFiles("templates/post.html")
 
+	fmt.Println(r.Method)
+
+	CheckForCookies(r, w)
+
 	if err := templ.Execute(w, MAINPAGEDATA); err != nil {
 		panic(err)
 	}
