@@ -72,6 +72,7 @@ func main() {
 	http.HandleFunc("/registration", LoadRegistrationPage)
 	http.HandleFunc("/exit", ShutdownServer)
 	http.HandleFunc("/1", LoadPostPage)
+	http.HandleFunc("/new", LoadNewPostPage)
 
 	fmt.Println("Server is listening on port 8000...")
 	if http.ListenAndServe(":8000", nil) != nil {
@@ -260,6 +261,18 @@ func LoadRegistrationPage(w http.ResponseWriter, r *http.Request) {
 
 func LoadPostPage(w http.ResponseWriter, r *http.Request) {
 	templ, _ := template.ParseFiles("templates/post.html")
+
+	fmt.Println(r.Method)
+
+	CheckForCookies(r, w)
+
+	if err := templ.Execute(w, MAINPAGEDATA); err != nil {
+		panic(err)
+	}
+}
+
+func LoadNewPostPage(w http.ResponseWriter, r *http.Request) {
+	templ, _ := template.ParseFiles("templates/new.html")
 
 	fmt.Println(r.Method)
 

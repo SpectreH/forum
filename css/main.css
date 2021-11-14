@@ -87,22 +87,23 @@ h3 {
 
 /* Buttons sections */
 
-.header-list-element-link-border, .new-comment-submit {
+.header-list-element-link-border, .new-comment-submit, .new-post-add-picture-new, .new-post-submit {
     margin: 0px;
     border-radius: 0.5rem;
     padding: 0.5rem 1rem;
-    font-weight: 700;
     border: 1px solid #4CAF50;
     background: transparent;
     color: rgb(51, 51, 51);
     transition: all 0.1s ease 0s;
+
+    font-weight: 700;
+    font-size: 18px;
 }
 
-.header-list-element-link-border:hover, .new-comment-submit:hover {
+.header-list-element-link-border:hover, .new-comment-submit:hover, .new-post-add-picture-new:hover, .new-post-submit:hover {
     border: 1px solid transparent;
     background: #4CAF50;
     color: rgb(255, 255, 255);
-    width: calc(50% + 12px);
 }
 
 .new-comment-submit:hover {
