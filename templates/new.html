@@ -42,7 +42,7 @@
   <div class="header-line"></div>
   <section class="hero-block">
     <div class="alert-section">
-      <div style="display: none; width: fit-content;" name="alert" onclick="this.style.display='none';">
+      <div style="display: none; width: fit-content;" name="alert" onclick="ClearAlertMessage(this)">
         <h1 class="alert" style="font-size: 20px;" name="alert-text"></h1>
       </div>
     </div>
@@ -51,7 +51,7 @@
     <div class="content-area">
       <main class="new-main-section">
         <h1>Add New Post</h1>
-        <form class="new-post-form" method="post" action="">
+        <form class="new-post-form" method="post" id="mainForm">
             <input class="new-post-title" id="title" name="title" placeholder="Enter title here" required>
             <textarea class="new-post-textarea" name="new-content" id="new-content" required></textarea>
             <div class="new-post-picture">
@@ -62,13 +62,18 @@
                   <label id="imageName"></label>
               </div>
             </div>
-            <button class="new-post-submit" type="submit">Publish</button>
         </form>
+        <button class="new-post-submit" onclick="SubmitForm()">Publish</button>
       </main>
       <aside class="new-sidebar">
         <div class="categories-widget">
           <h1>Set Categories</h1>
-          <input type="text">
+          <div class="add-new-categorie">
+            <input class="new-post-categorie" id="newCategorie" name="categorie" placeholder="Enter categorie here">
+            <button class="new-post-categorie-add" onclick="AddCategorie()">Add</button>
+          </div>
+          <div class="all-new-categories" id="allNewCategories">
+          </div>
         </div>
       </aside>
     </div>

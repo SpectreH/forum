@@ -87,7 +87,7 @@ h3 {
 
 /* Buttons sections */
 
-.header-list-element-link-border, .new-comment-submit, .new-post-add-picture-new, .new-post-submit {
+.header-list-element-link-border, .new-comment-submit, .new-post-add-picture-new, .new-post-submit, .new-post-categorie-add {
     margin: 0px;
     border-radius: 0.5rem;
     padding: 0.5rem 1rem;
@@ -100,7 +100,7 @@ h3 {
     font-size: 18px;
 }
 
-.header-list-element-link-border:hover, .new-comment-submit:hover, .new-post-add-picture-new:hover, .new-post-submit:hover {
+.header-list-element-link-border:hover, .new-comment-submit:hover, .new-post-add-picture-new:hover, .new-post-submit:hover, .new-post-categorie-add:hover {
     border: 1px solid transparent;
     background: #4CAF50;
     color: rgb(255, 255, 255);
@@ -222,14 +222,12 @@ h3 {
 .category-box {
     border: 1px solid #cccccc;
     background-color: #dfdfdf;
-    padding: 0 5px;
     height: fit-content;
 }
 
 .category-box:hover {
     border: 1px solid #afafaf;
     background-color: #aaa9a9;
-    padding: 0 5px;
     height: fit-content;
 }
 
@@ -241,6 +239,10 @@ h3 {
 .category-box:hover[type="show-more"] {
     border: 1px solid #77cc66;
     background-color: rgb(108, 202, 89);
+}
+
+.category-box-content {
+    padding: 0 5px;  
 }
 
 .post-entry-categories, .post-categories {
