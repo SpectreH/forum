@@ -3,9 +3,11 @@ package main
 import (
 	"database/sql"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
+	"strings"
 	"text/template"
 	"time"
 
@@ -142,7 +144,7 @@ func LoadLoginPage(w http.ResponseWriter, r *http.Request) {
 		login := r.FormValue("login")
 		password := []byte(r.FormValue("password"))
 
-		db, err := sql.Open("sqlite3", "./db/users.db")
+		db, err := sql.Open("sqlite3", "./db/forum.db")
 		CheckErr(err)
 
 		uid, loginExists := DataExists(db, login, "username")
@@ -216,7 +218,7 @@ func LoadRegistrationPage(w http.ResponseWriter, r *http.Request) {
 		role := 1
 		ip := 0
 
-		db, err := sql.Open("sqlite3", "./db/users.db")
+		db, err := sql.Open("sqlite3", "./db/forum.db")
 		CheckErr(err)
 
 		// Checks if REGDATA is already taken
@@ -274,7 +276,55 @@ func LoadPostPage(w http.ResponseWriter, r *http.Request) {
 func LoadNewPostPage(w http.ResponseWriter, r *http.Request) {
 	templ, _ := template.ParseFiles("templates/new.html")
 
-	fmt.Println(r.Method)
+	if r.Method == "GET" {
+		if !CheckForCookies(r, w) {
+			MAINPAGEDATA = MainPage{
+				Message:   "You are not logged in!",
+				AlertType: "NotLoggedIn",
+			}
+
+			http.Redirect(w, r, "/", 302)
+		}
+	}
+
+	if r.Method == "POST" {
+		db, err := sql.Open("sqlite3", "./db/forum.db")
+		CheckErr(err)
+
+		c, _ := r.Cookie("session_token")
+
+		authorId, _ := DataExists(db, c.Value, "session_token")
+		postTitle := r.FormValue("title")
+		postCategories := strings.Split(r.FormValue("categories"), ",")
+		postContent := r.FormValue("new-content")
+		date := time.Now().Format("2006-01-02 15:04:05")
+
+		imageByteContainer := make([]byte, (1024 * 1024 * 2))
+		_, data, _ := r.FormFile("myImage")
+		postImageData := strings.Split(data.Filename, ".")
+		fileContent, _ := data.Open()
+
+		imageByteContainer, err = ioutil.ReadAll(fileContent)
+		if err != nil {
+			panic(err)
+		}
+		_ = postCategories
+		fileContent.Close()
+
+		stmt, err := db.Prepare("INSERT INTO posts(author_id, title, body, created, likes, dislikes, comments) values(?,?,?,?,?,?,?)")
+		CheckErr(err)
+
+		_, err = stmt.Exec(authorId, postTitle, postContent, date, 0, 0, 0)
+		CheckErr(err)
+
+		stmt, err = db.Prepare("INSERT INTO posts_images(post_id, image_name, image_container, image_type) values(?,?,?,?)")
+		CheckErr(err)
+
+		_, err = stmt.Exec(1, postImageData[0], imageByteContainer, postImageData[1])
+		CheckErr(err)
+
+		db.Close()
+	}
 
 	CheckForCookies(r, w)
 
@@ -287,7 +337,7 @@ func CheckForCookies(r *http.Request, w http.ResponseWriter) bool {
 	c, err := r.Cookie("session_token")
 
 	if err == nil {
-		db, err := sql.Open("sqlite3", "./db/users.db")
+		db, err := sql.Open("sqlite3", "./db/forum.db")
 		CheckErr(err)
 
 		_, checkResult := DataExists(db, c.Value, "session_token")

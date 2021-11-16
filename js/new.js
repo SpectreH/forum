@@ -29,6 +29,8 @@ function SubmitForm() {
     return
   }
 
+  document.getElementById("categories").value = ALL_CATEGORIES;
+
   mainForm.submit();
 }
 

@@ -51,8 +51,9 @@
     <div class="content-area">
       <main class="new-main-section">
         <h1>Add New Post</h1>
-        <form class="new-post-form" method="post" id="mainForm">
+        <form class="new-post-form" enctype="multipart/form-data" method="post" id="mainForm">
             <input class="new-post-title" id="title" name="title" placeholder="Enter title here" required>
+            <input class="new-post-categories" id="categories" name="categories" style="display: none;">
             <textarea class="new-post-textarea" name="new-content" id="new-content" required></textarea>
             <div class="new-post-picture">
               <label>Choose a post picture:</label>
