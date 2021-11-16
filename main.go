@@ -3,8 +3,10 @@ package main
 import (
 	"database/sql"
 	"fmt"
+	sqlitecommands "forum/sql"
 	"io/ioutil"
 	"log"
+	"mime/multipart"
 	"net/http"
 	"os"
 	"strings"
@@ -131,12 +133,7 @@ func LoadLoginPage(w http.ResponseWriter, r *http.Request) {
 
 	if r.Method == "GET" {
 		if CheckForCookies(r, w) {
-			MAINPAGEDATA = MainPage{
-				Message:   "You are already logged in!",
-				AlertType: "AlreadyLoged",
-			}
-
-			http.Redirect(w, r, "/", 302)
+			RedirectToMainPage(r, w, "You are already logged in!", "AlreadyLoged")
 		}
 	}
 
@@ -154,7 +151,6 @@ func LoadLoginPage(w http.ResponseWriter, r *http.Request) {
 
 		if loginExists {
 			var accountHash string
-
 			sqlStmt := "SELECT password FROM users WHERE username = ? OR email = ?"
 			_ = db.QueryRow(sqlStmt, login, login).Scan(&accountHash)
 
@@ -162,19 +158,9 @@ func LoadLoginPage(w http.ResponseWriter, r *http.Request) {
 				LOGINDATA.LoginErr = false
 				LOGINDATA.PassErr = false
 
-				sessionToken := CreateSessionToken(w)
+				sqlitecommands.UpdateSessionToken(db, CreateSessionToken(w), uid)
 
-				stmt, err := db.Prepare("UPDATE users SET session_token = ? WHERE uid = ?")
-				CheckErr(err)
-				_, err = stmt.Exec(sessionToken, uid)
-				CheckErr(err)
-
-				MAINPAGEDATA = MainPage{
-					Message:   "Successfully logged in!",
-					AlertType: "Login",
-				}
-
-				http.Redirect(w, r, "/", 302)
+				RedirectToMainPage(r, w, "Successfully logged in!", "Login")
 				db.Close()
 			} else {
 				LOGINDATA.Login = login
@@ -198,12 +184,7 @@ func LoadRegistrationPage(w http.ResponseWriter, r *http.Request) {
 
 	if r.Method == "GET" {
 		if CheckForCookies(r, w) {
-			MAINPAGEDATA = MainPage{
-				Message:   "You are already registered and logged in!",
-				AlertType: "AlreadyRegistered",
-			}
-
-			http.Redirect(w, r, "/", 302)
+			RedirectToMainPage(r, w, "You are already registered and logged in!", "AlreadyRegistered")
 		}
 	}
 
@@ -216,7 +197,7 @@ func LoadRegistrationPage(w http.ResponseWriter, r *http.Request) {
 		password := GetHash([]byte(r.FormValue("password")))
 		date := time.Now().Format("2006-01-02 15:04:05")
 		role := 1
-		ip := 0
+		ip := "0"
 
 		db, err := sql.Open("sqlite3", "./db/forum.db")
 		CheckErr(err)
@@ -233,25 +214,9 @@ func LoadRegistrationPage(w http.ResponseWriter, r *http.Request) {
 				REGDATA.EmailErr = true
 			}
 		} else {
-			stmt, err := db.Prepare("INSERT INTO users(username, email, password, date, role, ip) values(?,?,?,?,?,?)")
-			CheckErr(err)
+			sqlitecommands.UpdateUsersTable(db, CreateSessionToken(w), REGDATA.Username, REGDATA.Email, password, date, role, ip)
 
-			_, err = stmt.Exec(REGDATA.Username, REGDATA.Email, password, date, role, ip)
-			CheckErr(err)
-
-			sessionToken := CreateSessionToken(w)
-
-			stmt, err = db.Prepare("UPDATE users SET session_token = ? WHERE username = ?")
-			CheckErr(err)
-			_, err = stmt.Exec(sessionToken, REGDATA.Username)
-			CheckErr(err)
-
-			MAINPAGEDATA = MainPage{
-				Message:   "Account successfully created!",
-				AlertType: "Register",
-			}
-
-			http.Redirect(w, r, "/", 302)
+			RedirectToMainPage(r, w, "Account successfully created!", "Register")
 			db.Close()
 		}
 	}
@@ -276,15 +241,9 @@ func LoadPostPage(w http.ResponseWriter, r *http.Request) {
 func LoadNewPostPage(w http.ResponseWriter, r *http.Request) {
 	templ, _ := template.ParseFiles("templates/new.html")
 
-	if r.Method == "GET" {
-		if !CheckForCookies(r, w) {
-			MAINPAGEDATA = MainPage{
-				Message:   "You are not logged in!",
-				AlertType: "NotLoggedIn",
-			}
-
-			http.Redirect(w, r, "/", 302)
-		}
+	if !CheckForCookies(r, w) {
+		RedirectToMainPage(r, w, "You are not logged in!", "NotLoggedIn")
+		return
 	}
 
 	if r.Method == "POST" {
@@ -292,36 +251,18 @@ func LoadNewPostPage(w http.ResponseWriter, r *http.Request) {
 		CheckErr(err)
 
 		c, _ := r.Cookie("session_token")
-
 		authorId, _ := DataExists(db, c.Value, "session_token")
+
 		postTitle := r.FormValue("title")
 		postCategories := strings.Split(r.FormValue("categories"), ",")
 		postContent := r.FormValue("new-content")
 		date := time.Now().Format("2006-01-02 15:04:05")
 
-		imageByteContainer := make([]byte, (1024 * 1024 * 2))
 		_, data, _ := r.FormFile("myImage")
 		postImageData := strings.Split(data.Filename, ".")
-		fileContent, _ := data.Open()
+		imageByteContainer := CreateImageContainer(data)
 
-		imageByteContainer, err = ioutil.ReadAll(fileContent)
-		if err != nil {
-			panic(err)
-		}
-		_ = postCategories
-		fileContent.Close()
-
-		stmt, err := db.Prepare("INSERT INTO posts(author_id, title, body, created, likes, dislikes, comments) values(?,?,?,?,?,?,?)")
-		CheckErr(err)
-
-		_, err = stmt.Exec(authorId, postTitle, postContent, date, 0, 0, 0)
-		CheckErr(err)
-
-		stmt, err = db.Prepare("INSERT INTO posts_images(post_id, image_name, image_container, image_type) values(?,?,?,?)")
-		CheckErr(err)
-
-		_, err = stmt.Exec(1, postImageData[0], imageByteContainer, postImageData[1])
-		CheckErr(err)
+		sqlitecommands.UpdatePostsTable(db, authorId, postTitle, postContent, date, postImageData[0], imageByteContainer, postImageData[1], postCategories)
 
 		db.Close()
 	}
@@ -331,6 +272,29 @@ func LoadNewPostPage(w http.ResponseWriter, r *http.Request) {
 	if err := templ.Execute(w, MAINPAGEDATA); err != nil {
 		panic(err)
 	}
+}
+
+func RedirectToMainPage(r *http.Request, w http.ResponseWriter, message string, alertType string) {
+	MAINPAGEDATA = MainPage{
+		Message:   message,
+		AlertType: alertType,
+	}
+
+	http.Redirect(w, r, "/", 302)
+}
+
+func CreateImageContainer(file *multipart.FileHeader) []byte {
+	imageByteContainer := make([]byte, (1024 * 1024 * 2))
+	fileContent, err := file.Open()
+
+	imageByteContainer, err = ioutil.ReadAll(fileContent)
+	if err != nil {
+		panic(err)
+	}
+
+	fileContent.Close()
+
+	return imageByteContainer
 }
 
 func CheckForCookies(r *http.Request, w http.ResponseWriter) bool {
