@@ -17,7 +17,7 @@ func UpdateUsersTable(db *sql.DB, sessionToken string, userName string, email st
 	UpdateSessionToken(db, sessionToken, int(uid))
 }
 
-func UpdatePostsTable(db *sql.DB, authorId int, postTitle string, postContent string, date string, imageName string, imageContainer []byte, imageType string, postCategories []string) {
+func UpdatePostsTable(db *sql.DB, authorId int, postTitle string, postContent string, date string, imageName string, imageContainer string, imageType string, postCategories []string) {
 	stmt, err := db.Prepare("INSERT INTO posts(author_id, title, body, created, likes, dislikes, comments) values(?,?,?,?,?,?,?)")
 	CheckErr(err)
 
@@ -29,7 +29,7 @@ func UpdatePostsTable(db *sql.DB, authorId int, postTitle string, postContent st
 	UpdatePostsCategoriesTable(db, int(postId), postCategories)
 }
 
-func UpdatePostsPicturesTable(db *sql.DB, postId int, imageName string, imageContainer []byte, imageType string) {
+func UpdatePostsPicturesTable(db *sql.DB, postId int, imageName string, imageContainer string, imageType string) {
 	stmt, err := db.Prepare("INSERT INTO posts_images(post_id, image_name, image_container, image_type) values(?,?,?,?)")
 	CheckErr(err)
 
@@ -117,6 +117,20 @@ func UpdatePostsData(db *sql.DB, postId int, column string, updateType string) {
 	CheckErr(err)
 }
 
+func GetPostsIdGap(db *sql.DB) (int, int) {
+	var first, last int
+
+	selectStmt := "SELECT id FROM posts ORDER BY id DESC LIMIT 1"
+	err := db.QueryRow(selectStmt).Scan(&last)
+	CheckErr(err)
+
+	selectStmt = "SELECT id FROM posts LIMIT 1"
+	err = db.QueryRow(selectStmt).Scan(&first)
+	CheckErr(err)
+
+	return first, last
+}
+
 func FindSameCategory(db *sql.DB, category string) bool {
 	sqlStmt := "SELECT category FROM categories WHERE category = ?"
 	err := db.QueryRow(sqlStmt, category).Scan(&category)
@@ -127,6 +141,46 @@ func FindSameCategory(db *sql.DB, category string) bool {
 		return false
 	}
 	return true
+}
+
+func GetUserNameFromTable(db *sql.DB, id int) string {
+	var result string
+
+	selectStmt := "SELECT username FROM users WHERE uid = ?"
+	err := db.QueryRow(selectStmt, id).Scan(&result)
+	CheckErr(err)
+
+	return result
+}
+
+func GetPostCategoriesFromTable(db *sql.DB, id int) []string {
+	var result []string
+
+	rows, err := db.Query("SELECT category FROM posts_categories WHERE post_id = ?", id)
+	CheckErr(err)
+
+	for rows.Next() {
+		var value string
+
+		err := rows.Scan(&value)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		result = append(result, value)
+	}
+
+	return result
+}
+
+func GetImageDataFromTable(db *sql.DB, id int) (string, string, string) {
+	var imageName, imageType, imageCountainer string
+
+	selectStmt := "SELECT image_name, image_container, image_type FROM posts_images WHERE post_id = ?"
+	err := db.QueryRow(selectStmt, id).Scan(&imageName, &imageCountainer, &imageType)
+	CheckErr(err)
+
+	return imageName, imageCountainer, imageType
 }
 
 func CheckErr(err error) {

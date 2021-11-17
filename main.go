@@ -2,13 +2,14 @@ package main
 
 import (
 	"database/sql"
+	"encoding/base64"
 	"fmt"
-	sqlitecommands "forum/sql"
 	"io/ioutil"
 	"log"
 	"mime/multipart"
 	"net/http"
 	"os"
+	"strconv"
 	"strings"
 	"text/template"
 	"time"
@@ -16,7 +17,28 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 	uuid "github.com/satori/go.uuid"
 	"golang.org/x/crypto/bcrypt"
+
+	sqlitecommands "forum/sql"
 )
+
+type Image struct {
+	Name      string
+	Type      string
+	Container string
+}
+
+type Post struct {
+	PostId     int
+	Author     string
+	Title      string
+	Body       string
+	Created    string
+	Likes      int
+	DisLikes   int
+	Comments   int
+	Categories []string
+	Image      Image
+}
 
 type Registration struct {
 	NameErr  bool
@@ -34,6 +56,7 @@ type Login struct {
 type MainPage struct {
 	Message   string
 	AlertType string
+	Posts     []Post
 	LoggedIn  bool
 }
 
@@ -58,6 +81,7 @@ func main() {
 	MAINPAGEDATA = MainPage{
 		Message:   "",
 		AlertType: "",
+		Posts:     nil,
 		LoggedIn:  false,
 	}
 
@@ -75,13 +99,17 @@ func main() {
 	http.HandleFunc("/login", LoadLoginPage)
 	http.HandleFunc("/registration", LoadRegistrationPage)
 	http.HandleFunc("/exit", ShutdownServer)
-	http.HandleFunc("/1", LoadPostPage)
 	http.HandleFunc("/new", LoadNewPostPage)
+	http.HandleFunc("/favicon.ico", Void)
 
 	fmt.Println("Server is listening on port 8000...")
 	if http.ListenAndServe(":8000", nil) != nil {
 		log.Fatalf("%v - Internal Server Error", http.StatusInternalServerError)
 	}
+}
+
+func Void(w http.ResponseWriter, r *http.Request) {
+
 }
 
 func LogOut(w http.ResponseWriter, r *http.Request) {
@@ -101,9 +129,12 @@ func LogOut(w http.ResponseWriter, r *http.Request) {
 }
 
 func LoadMainPage(w http.ResponseWriter, r *http.Request) {
-	templ, _ := template.ParseFiles("templates/main.html")
+	if RedirectToPostPage(r.URL.Path) {
+		LoadPostPage(w, r)
+		return
+	}
 
-	CheckForCookies(r, w)
+	templ, _ := template.ParseFiles("templates/main.html")
 
 	REGDATA = Registration{
 		NameErr:  false,
@@ -118,6 +149,36 @@ func LoadMainPage(w http.ResponseWriter, r *http.Request) {
 		Login:    "",
 	}
 
+	db, err := sql.Open("sqlite3", "./db/forum.db")
+	CheckErr(err)
+	rows, err := db.Query("SELECT * FROM posts")
+	CheckErr(err)
+
+	var ALLPOSTS []Post
+
+	for rows.Next() {
+		var post Post
+		var date time.Time
+		var authorId int
+
+		err := rows.Scan(&post.PostId, &authorId, &post.Title, &post.Body, &date, &post.Likes, &post.DisLikes, &post.Comments)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		post.Created = date.Format("January 02, 2006 at 15:04")
+		post.Author = sqlitecommands.GetUserNameFromTable(db, authorId)
+		post.Categories = sqlitecommands.GetPostCategoriesFromTable(db, post.PostId)
+		post.Image.Name, post.Image.Container, post.Image.Type = sqlitecommands.GetImageDataFromTable(db, post.PostId)
+
+		ALLPOSTS = append(ALLPOSTS, post)
+	}
+
+	db.Close()
+
+	MAINPAGEDATA.Posts = ALLPOSTS
+
+	CheckForCookies(r, w)
 	if err := templ.Execute(w, MAINPAGEDATA); err != nil {
 		panic(err)
 	}
@@ -260,9 +321,9 @@ func LoadNewPostPage(w http.ResponseWriter, r *http.Request) {
 
 		_, data, _ := r.FormFile("myImage")
 		postImageData := strings.Split(data.Filename, ".")
-		imageByteContainer := CreateImageContainer(data)
+		imageContainer := CreateImageContainer(data)
 
-		sqlitecommands.UpdatePostsTable(db, authorId, postTitle, postContent, date, postImageData[0], imageByteContainer, postImageData[1], postCategories)
+		sqlitecommands.UpdatePostsTable(db, authorId, postTitle, postContent, date, postImageData[0], imageContainer, postImageData[1], postCategories)
 
 		db.Close()
 	}
@@ -283,7 +344,23 @@ func RedirectToMainPage(r *http.Request, w http.ResponseWriter, message string, 
 	http.Redirect(w, r, "/", 302)
 }
 
-func CreateImageContainer(file *multipart.FileHeader) []byte {
+func RedirectToPostPage(URL string) bool {
+	db, err := sql.Open("sqlite3", "./db/forum.db")
+	CheckErr(err)
+
+	first, last := sqlitecommands.GetPostsIdGap(db)
+	db.Close()
+	postId := strings.Trim(URL, "/")
+	number, err := strconv.Atoi(postId)
+	if err == nil {
+		if number <= last && first <= number {
+			return true
+		}
+	}
+	return false
+}
+
+func CreateImageContainer(file *multipart.FileHeader) string {
 	imageByteContainer := make([]byte, (1024 * 1024 * 2))
 	fileContent, err := file.Open()
 
@@ -294,12 +371,11 @@ func CreateImageContainer(file *multipart.FileHeader) []byte {
 
 	fileContent.Close()
 
-	return imageByteContainer
+	return base64.StdEncoding.EncodeToString(imageByteContainer)
 }
 
 func CheckForCookies(r *http.Request, w http.ResponseWriter) bool {
 	c, err := r.Cookie("session_token")
-
 	if err == nil {
 		db, err := sql.Open("sqlite3", "./db/forum.db")
 		CheckErr(err)
@@ -326,7 +402,7 @@ func CreateSessionToken(w http.ResponseWriter) string {
 	http.SetCookie(w, &http.Cookie{
 		Name:    "session_token",
 		Value:   sessionToken,
-		Expires: time.Now().Add(20 * time.Second),
+		Expires: time.Now().Add(1200 * time.Second),
 	})
 	return sessionToken
 }

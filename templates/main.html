@@ -46,54 +46,42 @@
         </div>
     </section>
     <section class="content-block">
-        <div class="content"> 
-            <article class="content-post">
+        <div class="content">
+            {{range .Posts}}
+            <article class="content-post" id="{{.PostId}}">
                 <header class="post-entry-header">
                     <h2 class="post-entry-title">
-                        <a class="post-entry-title-text" href="/1">How to Easily Update URLs When Moving Your WordPress Site</a>
+                        <a class="post-entry-title-text" href="/{{.PostId}}">{{.Title}}</a>
                     </h2>
                 </header>
                 <div class="post-entry-info">
                     Posted on
-                    <time itemprop="datePublished" datetime="2021-11-11T06:30:18+00:00">November 11th, 2021</time>
+                    <time itemprop="datePublished" datetime="2021-11-11T06:30:18Z">{{.Created}}</time>
                     by
                     <a class="post-entry-info-author" href="https://www.wpbeginner.com/author/wpbeginner/"
-                        title="Posts by Editorial Staff" rel="author">Editorial Staff</a>
+                        title="Posts by Editorial Staff" rel="author">{{.Author}}</a>
                 </div>
                 <div class="post-entry-content">
                     <a class="post-entry-content-image-link" href="#" aria-hidden="true">
                         <img width="180" height="180"
-                            src="https://pbs.twimg.com/profile_images/866895795332710401/UJfny__l_400x400.jpg" class="asdf"
-                            alt="asdf" itemprop="image">
+                            src="data:image/{{.Image.Type}};base64,{{.Image.Container}}" class="asdf"
+                            alt="{{.Image.Name}}" itemprop="image">
                     </a>
-                    <p class="post-entry-content-text">Do you want to update URLs after moving your WordPress site? It can be pretty
-                        time-consuming to
-                        manually edit each
-                        post or page just to replace old URLs. Luckily, there are WordPress plugin that help you automate
-                        the process of
-                        updating old URLs. In this…&nbsp;
+                    <p class="post-entry-content-text">{{.Body}}…&nbsp;
                         <strong> <a href="#">Read More »</a> </strong>
                     </p>
                 </div>
                 <div class="post-entry-categories-section">
                     <div class="post-entry-categories-header">Categories</div>
                     <div class="post-entry-categories">
-                        <div class="category-box" style="display: none;"><a class="category-box-content" type="category" rel="nofollow" href="#">Crime</a></div>
-                        <div class="category-box" style="display: none;"><a class="category-box-content" type="category" rel="nofollow" href="#">Politic</a></div>
-                        <div class="category-box" style="display: none;"><a class="category-box-content" type="category" rel="nofollow" href="#">Programming</a></div>
-                        <div class="category-box" style="display: none;"><a class="category-box-content" type="category" rel="nofollow" href="#">Game-Desing</a></div>
-                        <div class="category-box" style="display: none;"><a class="category-box-content" type="category" rel="nofollow" href="#">News</a></div>
-                        <div class="category-box" style="display: none;"><a class="category-box-content" type="category" rel="nofollow" href="#">English</a></div>
-                        <div class="category-box" style="display: none;"><a class="category-box-content" type="category" rel="nofollow" href="#">Crime</a></div>
-                        <div class="category-box" style="display: none;"><a class="category-box-content" type="category" rel="nofollow" href="#">Politic</a></div>
-                        <div class="category-box" style="display: none;"><a class="category-box-content" type="category" rel="nofollow" href="#">Programming</a></div>
-                        <div class="category-box" style="display: none;"><a class="category-box-content" type="category" rel="nofollow" href="#">Game-Desing</a></div>
-                        <div class="category-box" style="display: none;"><a class="category-box-content" type="category" rel="nofollow" href="#">News</a></div>
-                        <div class="category-box" style="display: none;"><a class="category-box-content" type="category" rel="nofollow" href="#">English</a></div>
+                        {{range .Categories}}
+                        <div class="category-box" style="display: none;"><a class="category-box-content" type="category" rel="nofollow" href="#">{{.}}</a></div>
+                        {{end}}
                     </div>
                 </div>
                 <footer class="post-entry-footer"></footer>
             </article>
+            {{end}}
         </div>
     </section>
 </body>
