@@ -2,8 +2,8 @@ package sqlitecommands
 
 import (
 	"database/sql"
-	"fmt"
 	"log"
+	"net/http"
 )
 
 func UpdateUsersTable(db *sql.DB, sessionToken string, userName string, email string, password string, date string, role int, ip string) {
@@ -62,29 +62,75 @@ func UpdateCategoriesTable(db *sql.DB, categories []string) {
 }
 
 func UpdatePostsCommentsTable(db *sql.DB, postId int, authorId int, created string, body string) {
+	var value int
+
 	stmt, err := db.Prepare("INSERT INTO posts_comments(post_id, author_id, created, body) values(?,?,?,?)")
 	CheckErr(err)
 
 	_, err = stmt.Exec(postId, authorId, created, body)
 	CheckErr(err)
+
+	counterStmt := "SELECT COUNT (*) FROM posts_comments WHERE post_id = ?"
+	_ = db.QueryRow(counterStmt, postId).Scan(&value)
+	CheckErr(err)
+
+	updateStmt, err := db.Prepare("UPDATE posts SET comments = ? WHERE id = ?")
+	CheckErr(err)
+
+	_, err = updateStmt.Exec(value, postId)
+	CheckErr(err)
 }
 
-func UpdateRatingsTable(db *sql.DB, postId int, authorId int, updateType string, rating string) {
+func UpdateRatingsTable(db *sql.DB, postId int, authorId int, updateType string, table string) {
 	var stmt *sql.Stmt
 	var err error
+	var value int
+	var row, mirrorTable, mirrorRow string
 
-	if rating != "posts_likes" && rating != "posts_dislikes" {
+	if table != "posts_likes" && table != "posts_dislikes" {
 		return
 	}
 
-	if updateType == "add" {
-		stmt, err = db.Prepare("INSERT INTO " + rating + "(post_id, author_id) values(?,?)")
+	if table == "posts_likes" {
+		row = "likes"
+		mirrorRow = "dislikes"
+		mirrorTable = "posts_dislikes"
 	} else {
-		stmt, err = db.Prepare("DELETE FROM " + rating + " WHERE post_id = ? AND author_id = ?")
+		row = "dislikes"
+		mirrorRow = "likes"
+		mirrorTable = "posts_likes"
 	}
-	CheckErr(err)
+
+	if updateType == "add" {
+		stmt, err = db.Prepare("INSERT INTO " + table + "(post_id, author_id) values(?,?)")
+		CheckErr(err)
+
+		checkStmt, err := db.Prepare("DELETE FROM " + mirrorTable + " WHERE post_id = ? AND author_id = ?")
+		CheckErr(err)
+
+		_, err = checkStmt.Exec(postId, authorId)
+		CheckErr(err)
+
+		updateStmtMirrow, err := db.Prepare("UPDATE posts SET " + mirrorRow + " = ? WHERE id = ?")
+		CheckErr(err)
+
+		mirrorCounterStmt := "SELECT COUNT (*) FROM " + mirrorTable + " WHERE post_id = ?"
+		_ = db.QueryRow(mirrorCounterStmt, postId).Scan(&value)
+		_, err = updateStmtMirrow.Exec(value, postId)
+		CheckErr(err)
+	} else {
+		stmt, err = db.Prepare("DELETE FROM " + table + " WHERE post_id = ? AND author_id = ?")
+		CheckErr(err)
+	}
 
 	_, err = stmt.Exec(postId, authorId)
+	CheckErr(err)
+
+	updateStmt, err := db.Prepare("UPDATE posts SET " + row + " = ? WHERE id = ?")
+	CheckErr(err)
+	counterStmt := "SELECT COUNT (*) FROM " + table + " WHERE post_id = ?"
+	_ = db.QueryRow(counterStmt, postId).Scan(&value)
+	_, err = updateStmt.Exec(value, postId)
 	CheckErr(err)
 }
 
@@ -92,28 +138,6 @@ func UpdateSessionToken(db *sql.DB, sessionToken string, uid int) {
 	stmt, err := db.Prepare("UPDATE users SET session_token = ? WHERE uid = ?")
 	CheckErr(err)
 	_, err = stmt.Exec(sessionToken, uid)
-	CheckErr(err)
-}
-
-func UpdatePostsData(db *sql.DB, postId int, column string, updateType string) {
-	updateStmt, err := db.Prepare("UPDATE posts SET " + column + " = ? WHERE id = ?")
-	CheckErr(err)
-
-	var value int
-	selectStmt := "SELECT " + column + " FROM posts WHERE id = ?"
-	err = db.QueryRow(selectStmt, postId).Scan(&value)
-	if err != nil {
-		fmt.Println("error")
-		return
-	}
-
-	if updateType == "sum" {
-		value += 1
-	} else {
-		value -= 1
-	}
-
-	_, err = updateStmt.Exec(value, postId)
 	CheckErr(err)
 }
 
@@ -129,18 +153,6 @@ func GetPostsIdGap(db *sql.DB) (int, int) {
 	CheckErr(err)
 
 	return first, last
-}
-
-func FindSameCategory(db *sql.DB, category string) bool {
-	sqlStmt := "SELECT category FROM categories WHERE category = ?"
-	err := db.QueryRow(sqlStmt, category).Scan(&category)
-	if err != nil {
-		if err != sql.ErrNoRows {
-			log.Print(err)
-		}
-		return false
-	}
-	return true
 }
 
 func GetUserNameFromTable(db *sql.DB, id int) string {
@@ -181,6 +193,66 @@ func GetImageDataFromTable(db *sql.DB, id int) (string, string, string) {
 	CheckErr(err)
 
 	return imageName, imageCountainer, imageType
+}
+
+func GetIntDataFromTable(db *sql.DB, tableName string, columnName string, id int, idColumnName string) int {
+	var result int
+
+	return result
+}
+
+func GetUserScoreOnPost(db *sql.DB, postId int, authorId int, tableName string) bool {
+	var value int
+
+	sqlStmt := "SELECT COUNT (*) FROM " + tableName + " WHERE post_id = ? and author_id = ?"
+	_ = db.QueryRow(sqlStmt, postId, authorId).Scan(&value)
+
+	if value == 1 {
+		return true
+	}
+
+	return false
+}
+
+func GetUserIdByCookies(db *sql.DB, r *http.Request, w http.ResponseWriter) int {
+	c, err := r.Cookie("session_token")
+
+	if err == nil {
+		uid, checkResult := CheckDataExistence(db, c.Value, "session_token")
+
+		if checkResult {
+			return uid
+		} else {
+			w.WriteHeader(http.StatusBadRequest)
+		}
+	}
+
+	return -1
+}
+
+func FindSameCategory(db *sql.DB, category string) bool {
+	sqlStmt := "SELECT category FROM categories WHERE category = ?"
+	err := db.QueryRow(sqlStmt, category).Scan(&category)
+	if err != nil {
+		if err != sql.ErrNoRows {
+			log.Print(err)
+		}
+		return false
+	}
+	return true
+}
+
+func CheckDataExistence(db *sql.DB, REGDATA string, dataType string) (int, bool) {
+	var uid int
+	sqlStmt := "SELECT " + dataType + ", uid FROM users WHERE " + dataType + " = ?"
+	err := db.QueryRow(sqlStmt, REGDATA).Scan(&REGDATA, &uid)
+	if err != nil {
+		if err != sql.ErrNoRows {
+			log.Print(err)
+		}
+		return -1, false
+	}
+	return uid, true
 }
 
 func CheckErr(err error) {

@@ -40,6 +40,12 @@ type Post struct {
 	Image      Image
 }
 
+type Comment struct {
+	Author  string
+	Created string
+	Body    string
+}
+
 type Registration struct {
 	NameErr  bool
 	EmailErr bool
@@ -60,9 +66,20 @@ type MainPage struct {
 	LoggedIn  bool
 }
 
+type PostPage struct {
+	Message   string
+	AlertType string
+	Post      Post
+	Comments  []Comment
+	LoggedIn  bool
+	Like      bool
+	Dislike   bool
+}
+
 var MAINPAGEDATA MainPage
 var REGDATA Registration
 var LOGINDATA Login
+var POSTID int
 
 func main() {
 	REGDATA := Registration{
@@ -109,7 +126,6 @@ func main() {
 }
 
 func Void(w http.ResponseWriter, r *http.Request) {
-
 }
 
 func LogOut(w http.ResponseWriter, r *http.Request) {
@@ -205,9 +221,9 @@ func LoadLoginPage(w http.ResponseWriter, r *http.Request) {
 		db, err := sql.Open("sqlite3", "./db/forum.db")
 		CheckErr(err)
 
-		uid, loginExists := DataExists(db, login, "username")
+		uid, loginExists := sqlitecommands.CheckDataExistence(db, login, "username")
 		if !loginExists {
-			uid, loginExists = DataExists(db, login, "email")
+			uid, loginExists = sqlitecommands.CheckDataExistence(db, login, "email")
 		}
 
 		if loginExists {
@@ -264,8 +280,8 @@ func LoadRegistrationPage(w http.ResponseWriter, r *http.Request) {
 		CheckErr(err)
 
 		// Checks if REGDATA is already taken
-		_, freeUserName := DataExists(db, REGDATA.Username, "username")
-		_, freeEmail := DataExists(db, REGDATA.Email, "email")
+		_, freeUserName := sqlitecommands.CheckDataExistence(db, REGDATA.Username, "username")
+		_, freeEmail := sqlitecommands.CheckDataExistence(db, REGDATA.Email, "email")
 
 		if freeUserName || freeEmail {
 			if freeUserName {
@@ -290,11 +306,64 @@ func LoadRegistrationPage(w http.ResponseWriter, r *http.Request) {
 func LoadPostPage(w http.ResponseWriter, r *http.Request) {
 	templ, _ := template.ParseFiles("templates/post.html")
 
-	fmt.Println(r.Method)
+	db, err := sql.Open("sqlite3", "./db/forum.db")
+	CheckErr(err)
 
-	CheckForCookies(r, w)
+	if r.Method == "POST" {
+		authorId := sqlitecommands.GetUserIdByCookies(db, r, w)
+		date := time.Now().Format("2006-01-02 15:04:05")
 
-	if err := templ.Execute(w, MAINPAGEDATA); err != nil {
+		if r.FormValue("comment") != "" {
+			sqlitecommands.UpdatePostsCommentsTable(db, POSTID, authorId, date, r.FormValue("comment"))
+		} else {
+			var b []byte
+			b, _ = ioutil.ReadAll(r.Body)
+
+			if string(b) == "1" { // Like
+				sqlitecommands.UpdateRatingsTable(db, POSTID, authorId, "add", "posts_likes")
+			} else if string(b) == "2" { // Remove Like
+				sqlitecommands.UpdateRatingsTable(db, POSTID, authorId, "remove", "posts_likes")
+			} else if string(b) == "-1" { // DisLike
+				sqlitecommands.UpdateRatingsTable(db, POSTID, authorId, "add", "posts_dislikes")
+			} else if string(b) == "-2" { // Remove DisLike
+				sqlitecommands.UpdateRatingsTable(db, POSTID, authorId, "remove", "posts_dislikes")
+			}
+			db.Close()
+			return
+		}
+	}
+
+	var postPageData PostPage
+	postPageData.Post = CollectPostData(db)
+	postPageData.LoggedIn = CheckForCookies(r, w)
+	if postPageData.LoggedIn == true {
+		postPageData.Like = sqlitecommands.GetUserScoreOnPost(db, POSTID, sqlitecommands.GetUserIdByCookies(db, r, w), "posts_likes")
+		postPageData.Dislike = sqlitecommands.GetUserScoreOnPost(db, POSTID, sqlitecommands.GetUserIdByCookies(db, r, w), "posts_dislikes")
+	} else {
+		postPageData.Like = false
+		postPageData.Dislike = false
+	}
+
+	rows, err := db.Query("SELECT * FROM posts_comments WHERE post_id = ?", postPageData.Post.PostId)
+	CheckErr(err)
+
+	for rows.Next() {
+		var comment Comment
+		var date time.Time
+		var id, postId, authorId int
+
+		err := rows.Scan(&id, &postId, &authorId, &date, &comment.Body)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		comment.Author = sqlitecommands.GetUserNameFromTable(db, authorId)
+		comment.Created = date.Format("January 02, 2006 at 15:04")
+		postPageData.Comments = append(postPageData.Comments, comment)
+	}
+
+	db.Close()
+	if err := templ.Execute(w, postPageData); err != nil {
 		panic(err)
 	}
 }
@@ -312,7 +381,7 @@ func LoadNewPostPage(w http.ResponseWriter, r *http.Request) {
 		CheckErr(err)
 
 		c, _ := r.Cookie("session_token")
-		authorId, _ := DataExists(db, c.Value, "session_token")
+		authorId, _ := sqlitecommands.CheckDataExistence(db, c.Value, "session_token")
 
 		postTitle := r.FormValue("title")
 		postCategories := strings.Split(r.FormValue("categories"), ",")
@@ -354,6 +423,7 @@ func RedirectToPostPage(URL string) bool {
 	number, err := strconv.Atoi(postId)
 	if err == nil {
 		if number <= last && first <= number {
+			POSTID = number
 			return true
 		}
 	}
@@ -380,7 +450,7 @@ func CheckForCookies(r *http.Request, w http.ResponseWriter) bool {
 		db, err := sql.Open("sqlite3", "./db/forum.db")
 		CheckErr(err)
 
-		_, checkResult := DataExists(db, c.Value, "session_token")
+		_, checkResult := sqlitecommands.CheckDataExistence(db, c.Value, "session_token")
 		db.Close()
 
 		if checkResult {
@@ -415,17 +485,22 @@ func GetHash(pwd []byte) string {
 	return string(hash)
 }
 
-func DataExists(db *sql.DB, REGDATA string, dataType string) (int, bool) {
-	var uid int
-	sqlStmt := "SELECT " + dataType + ", uid FROM users WHERE " + dataType + " = ?"
-	err := db.QueryRow(sqlStmt, REGDATA).Scan(&REGDATA, &uid)
-	if err != nil {
-		if err != sql.ErrNoRows {
-			log.Print(err)
-		}
-		return -1, false
-	}
-	return uid, true
+func CollectPostData(db *sql.DB) Post {
+	var post Post
+	var date time.Time
+	var authorId int
+
+	_ = db.QueryRow("SELECT * FROM posts WHERE id = ?", POSTID).Scan(&post.PostId, &authorId, &post.Title, &post.Body, &date, &post.Likes, &post.DisLikes, &post.Comments)
+
+	post.Created = date.Format("January 02, 2006 at 15:04")
+	post.Author = sqlitecommands.GetUserNameFromTable(db, authorId)
+	post.Categories = sqlitecommands.GetPostCategoriesFromTable(db, post.PostId)
+
+	return post
+}
+
+func CollectComments(db *sql.DB) {
+
 }
 
 func ShutdownServer(w http.ResponseWriter, r *http.Request) {
