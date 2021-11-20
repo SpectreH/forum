@@ -61,9 +61,11 @@
             </p>
           </header>
           <div class="post-content">
+            {{range .Post.Body}}
             <p>
-              {{.Post.Body}}
+              {{.}}
             </p>
+            {{end}}
           </div>
           <div class="post-catregories-section">
             <div class="post-categories-header">Categories</div>
@@ -166,9 +168,11 @@
                     </p>
                   </header>
                   <div class="comment-content">
+                    {{range .Body}}
                     <p>
-                      {{.Body}}
+                      {{.}}
                     </p>
+                    {{end}}
                   </div>
                 </article>
               </li>

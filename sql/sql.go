@@ -144,6 +144,10 @@ func UpdateSessionToken(db *sql.DB, sessionToken string, uid int) {
 func GetPostsIdGap(db *sql.DB) (int, int) {
 	var first, last int
 
+	if CheckExistence(db, "posts") {
+		return -1, -1
+	}
+
 	selectStmt := "SELECT id FROM posts ORDER BY id DESC LIMIT 1"
 	err := db.QueryRow(selectStmt).Scan(&last)
 	CheckErr(err)
@@ -253,6 +257,17 @@ func CheckDataExistence(db *sql.DB, REGDATA string, dataType string) (int, bool)
 		return -1, false
 	}
 	return uid, true
+}
+
+func CheckExistence(db *sql.DB, tableName string) bool {
+	sqlStmt := "SELECT * FROM " + tableName
+	err := db.QueryRow(sqlStmt).Scan()
+
+	if err == sql.ErrNoRows {
+		return true
+	}
+
+	return false
 }
 
 func CheckErr(err error) {

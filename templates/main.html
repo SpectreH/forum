@@ -10,7 +10,7 @@
     <title>Forum - Main</title>
 </head>
 
-<body style="margin: 0; background: #f0f0f0;" onload="InitMainPage(loggedIn, messageType, alertMessage); ">
+<body style="margin: 0; background: #f0f0f0;" onload="InitMainPage(loggedIn, messageType, alertMessage);">
     <header class="header-block">
         <nav class="header-nav">
             <a href="/" class="header-link">
@@ -49,33 +49,34 @@
         <div class="content">
             {{range .Posts}}
             <article class="content-post" id="{{.PostId}}">
-                <header class="post-entry-header">
-                    <h2 class="post-entry-title">
-                        <a class="post-entry-title-text" href="/{{.PostId}}">{{.Title}}</a>
-                    </h2>
-                </header>
-                <div class="post-entry-info">
-                    Posted on
-                    <time itemprop="datePublished" datetime="2021-11-11T06:30:18Z">{{.Created}}</time>
-                    by
-                    <a class="post-entry-info-author" href="https://www.wpbeginner.com/author/wpbeginner/"
-                        title="Posts by Editorial Staff" rel="author">{{.Author}}</a>
-                </div>
                 <div class="post-entry-content">
-                    <a class="post-entry-content-image-link" href="#" aria-hidden="true">
-                        <img width="180" height="180"
-                            src="data:image/{{.Image.Type}};base64,{{.Image.Container}}" class="asdf"
-                            alt="{{.Image.Name}}" itemprop="image">
-                    </a>
-                    <p class="post-entry-content-text">{{.Body}}…&nbsp;
-                        <strong> <a href="#">Read More »</a> </strong>
-                    </p>
+                    <div class="post-entry-content-image">
+                        <a class="post-entry-content-image-link" href="#" aria-hidden="true">
+                            <img width="180" height="180" src="data:image/{{.Image.Type}};base64,{{.Image.Container}}" class="asdf"
+                                alt="{{.Image.Name}}" itemprop="image">
+                        </a>
+                    </div>
+                    <div class="post-entry-content-info">
+                        <header class="post-entry-header">
+                            <h2 class="post-entry-title">
+                                <a class="post-entry-title-text" href="/{{.PostId}}">{{.Title}}</a>
+                            </h2>
+                        </header>
+                        <div class="post-entry-info">
+                            Posted on
+                            <time itemprop="datePublished" datetime="2021-11-11T06:30:18Z">{{.Created}}</time>
+                            by
+                            <a class="post-entry-info-author" href="https://www.wpbeginner.com/author/wpbeginner/"
+                                title="Posts by Editorial Staff" rel="author">{{.Author}}</a>
+                        </div>
+                    </div>
                 </div>
                 <div class="post-entry-categories-section">
                     <div class="post-entry-categories-header">Categories</div>
                     <div class="post-entry-categories">
                         {{range .Categories}}
-                        <div class="category-box" style="display: none;"><a class="category-box-content" type="category" rel="nofollow" href="#">{{.}}</a></div>
+                        <div class="category-box" style="display: none;"><a class="category-box-content" type="category" rel="nofollow"
+                                href="#">{{.}}</a></div>
                         {{end}}
                     </div>
                 </div>

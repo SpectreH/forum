@@ -158,7 +158,7 @@ h3 {
 }
 
 .content {
-    width: 600px;
+    width: 700px;
     float: left;
     margin: 5px 5px 0 5px;
     border: 1px solid #dfdfdf;
@@ -195,8 +195,9 @@ h3 {
 }
 
 .post-entry-content {
-    display: flex;
-    margin: 10px 0 0;
+    display: inline-flex;
+    align-items: center;
+    gap: 15px;
 }
 
 .post-entry-content-image-link {
@@ -204,9 +205,12 @@ h3 {
 }
 
 .post-entry-content-text {
+    padding: 0 25px;
+}
+
+.post-entry-content-text p {
     font-size: 16px;
     line-height: 1.8em;
-    padding: 0 25px;
 }
 
 /* Category section */

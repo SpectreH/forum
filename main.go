@@ -8,7 +8,6 @@ import (
 	"log"
 	"mime/multipart"
 	"net/http"
-	"os"
 	"strconv"
 	"strings"
 	"text/template"
@@ -31,7 +30,7 @@ type Post struct {
 	PostId     int
 	Author     string
 	Title      string
-	Body       string
+	Body       []string
 	Created    string
 	Likes      int
 	DisLikes   int
@@ -43,7 +42,7 @@ type Post struct {
 type Comment struct {
 	Author  string
 	Created string
-	Body    string
+	Body    []string
 }
 
 type Registration struct {
@@ -115,7 +114,6 @@ func main() {
 	http.HandleFunc("/logout", LogOut)
 	http.HandleFunc("/login", LoadLoginPage)
 	http.HandleFunc("/registration", LoadRegistrationPage)
-	http.HandleFunc("/exit", ShutdownServer)
 	http.HandleFunc("/new", LoadNewPostPage)
 	http.HandleFunc("/favicon.ico", Void)
 
@@ -145,8 +143,12 @@ func LogOut(w http.ResponseWriter, r *http.Request) {
 }
 
 func LoadMainPage(w http.ResponseWriter, r *http.Request) {
-	if RedirectToPostPage(r.URL.Path) {
-		LoadPostPage(w, r)
+	if r.URL.Path != "/" {
+		if RedirectToPostPage(r.URL.Path) {
+			LoadPostPage(w, r)
+		} else {
+			fmt.Fprint(w, "Error 404")
+		}
 		return
 	}
 
@@ -167,32 +169,10 @@ func LoadMainPage(w http.ResponseWriter, r *http.Request) {
 
 	db, err := sql.Open("sqlite3", "./db/forum.db")
 	CheckErr(err)
-	rows, err := db.Query("SELECT * FROM posts")
-	CheckErr(err)
 
-	var ALLPOSTS []Post
-
-	for rows.Next() {
-		var post Post
-		var date time.Time
-		var authorId int
-
-		err := rows.Scan(&post.PostId, &authorId, &post.Title, &post.Body, &date, &post.Likes, &post.DisLikes, &post.Comments)
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		post.Created = date.Format("January 02, 2006 at 15:04")
-		post.Author = sqlitecommands.GetUserNameFromTable(db, authorId)
-		post.Categories = sqlitecommands.GetPostCategoriesFromTable(db, post.PostId)
-		post.Image.Name, post.Image.Container, post.Image.Type = sqlitecommands.GetImageDataFromTable(db, post.PostId)
-
-		ALLPOSTS = append(ALLPOSTS, post)
-	}
+	MAINPAGEDATA.Posts = CollectAllPostsData(db)
 
 	db.Close()
-
-	MAINPAGEDATA.Posts = ALLPOSTS
 
 	CheckForCookies(r, w)
 	if err := templ.Execute(w, MAINPAGEDATA); err != nil {
@@ -314,7 +294,8 @@ func LoadPostPage(w http.ResponseWriter, r *http.Request) {
 		date := time.Now().Format("2006-01-02 15:04:05")
 
 		if r.FormValue("comment") != "" {
-			sqlitecommands.UpdatePostsCommentsTable(db, POSTID, authorId, date, r.FormValue("comment"))
+			comment := base64.StdEncoding.EncodeToString([]byte(r.FormValue("comment")))
+			sqlitecommands.UpdatePostsCommentsTable(db, POSTID, authorId, date, comment)
 		} else {
 			var b []byte
 			b, _ = ioutil.ReadAll(r.Body)
@@ -334,6 +315,7 @@ func LoadPostPage(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var postPageData PostPage
+
 	postPageData.Post = CollectPostData(db)
 	postPageData.LoggedIn = CheckForCookies(r, w)
 	if postPageData.LoggedIn == true {
@@ -344,25 +326,9 @@ func LoadPostPage(w http.ResponseWriter, r *http.Request) {
 		postPageData.Dislike = false
 	}
 
-	rows, err := db.Query("SELECT * FROM posts_comments WHERE post_id = ?", postPageData.Post.PostId)
-	CheckErr(err)
-
-	for rows.Next() {
-		var comment Comment
-		var date time.Time
-		var id, postId, authorId int
-
-		err := rows.Scan(&id, &postId, &authorId, &date, &comment.Body)
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		comment.Author = sqlitecommands.GetUserNameFromTable(db, authorId)
-		comment.Created = date.Format("January 02, 2006 at 15:04")
-		postPageData.Comments = append(postPageData.Comments, comment)
-	}
-
+	postPageData.Comments = CollectAllPostComments(db, POSTID)
 	db.Close()
+
 	if err := templ.Execute(w, postPageData); err != nil {
 		panic(err)
 	}
@@ -385,7 +351,8 @@ func LoadNewPostPage(w http.ResponseWriter, r *http.Request) {
 
 		postTitle := r.FormValue("title")
 		postCategories := strings.Split(r.FormValue("categories"), ",")
-		postContent := r.FormValue("new-content")
+		postContent := base64.StdEncoding.EncodeToString([]byte(r.FormValue("new-content")))
+		fmt.Println([]byte(r.FormValue("new-content")))
 		date := time.Now().Format("2006-01-02 15:04:05")
 
 		_, data, _ := r.FormFile("myImage")
@@ -418,6 +385,10 @@ func RedirectToPostPage(URL string) bool {
 	CheckErr(err)
 
 	first, last := sqlitecommands.GetPostsIdGap(db)
+	if first == -1 && last == -1 {
+		return false
+	}
+
 	db.Close()
 	postId := strings.Trim(URL, "/")
 	number, err := strconv.Atoi(postId)
@@ -485,26 +456,102 @@ func GetHash(pwd []byte) string {
 	return string(hash)
 }
 
+func DivideBodyIntoParagraphs(body string) []string {
+	var result []string
+	var paragraph []byte
+
+	base64Body, err := base64.StdEncoding.DecodeString(body)
+	CheckErr(err)
+
+	for i := 0; i < len(base64Body); i++ {
+		paragraph = append(paragraph, base64Body[i])
+
+		if base64Body[i] == 13 {
+			result = append(result, string(paragraph))
+			i = i + 2
+			paragraph = make([]byte, 0)
+		}
+
+		if len(paragraph) != 0 && i == len(base64Body)-1 {
+			result = append(result, string(paragraph))
+		}
+	}
+
+	return result
+}
+
 func CollectPostData(db *sql.DB) Post {
 	var post Post
 	var date time.Time
+	var body string
 	var authorId int
 
-	_ = db.QueryRow("SELECT * FROM posts WHERE id = ?", POSTID).Scan(&post.PostId, &authorId, &post.Title, &post.Body, &date, &post.Likes, &post.DisLikes, &post.Comments)
+	_ = db.QueryRow("SELECT * FROM posts WHERE id = ?", POSTID).Scan(&post.PostId, &authorId, &post.Title, &body, &date, &post.Likes, &post.DisLikes, &post.Comments)
 
 	post.Created = date.Format("January 02, 2006 at 15:04")
 	post.Author = sqlitecommands.GetUserNameFromTable(db, authorId)
 	post.Categories = sqlitecommands.GetPostCategoriesFromTable(db, post.PostId)
+	post.Body = DivideBodyIntoParagraphs(body)
 
 	return post
 }
 
-func CollectComments(db *sql.DB) {
+func CollectAllPostsData(db *sql.DB) []Post {
+	var result []Post
 
+	rows, err := db.Query("SELECT * FROM posts")
+	CheckErr(err)
+
+	for rows.Next() {
+		var post Post
+		var date time.Time
+		var body string
+		var authorId int
+
+		err := rows.Scan(&post.PostId, &authorId, &post.Title, &body, &date, &post.Likes, &post.DisLikes, &post.Comments)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		post.Created = date.Format("January 02, 2006 at 15:04")
+		post.Author = sqlitecommands.GetUserNameFromTable(db, authorId)
+		post.Categories = sqlitecommands.GetPostCategoriesFromTable(db, post.PostId)
+		post.Image.Name, post.Image.Container, post.Image.Type = sqlitecommands.GetImageDataFromTable(db, post.PostId)
+		post.Body = DivideBodyIntoParagraphs(body)
+
+		result = append(result, post)
+	}
+
+	db.Close()
+
+	return result
 }
 
-func ShutdownServer(w http.ResponseWriter, r *http.Request) {
-	os.Exit(0)
+func CollectAllPostComments(db *sql.DB, postId int) []Comment {
+	var result []Comment
+
+	rows, err := db.Query("SELECT * FROM posts_comments WHERE post_id = ?", postId)
+	CheckErr(err)
+
+	for rows.Next() {
+		var comment Comment
+		var body string
+		var date time.Time
+		var id, postId, authorId int
+
+		err := rows.Scan(&id, &postId, &authorId, &date, &body)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		comment.Author = sqlitecommands.GetUserNameFromTable(db, authorId)
+		comment.Created = date.Format("January 02, 2006 at 15:04")
+		comment.Body = DivideBodyIntoParagraphs(body)
+
+		result = append(result, comment)
+	}
+
+	return result
 }
 
 func CheckErr(err error) {
