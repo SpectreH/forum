@@ -150,11 +150,16 @@ h3 {
     padding: 0 20px;    
 }
 
-/* Posts Section */
+/* Posts section */
 
 .content-block {
     display: grid;
     justify-content: center;
+}
+
+.content-area {
+    display: flex;
+    grid-column-gap: 32px;
 }
 
 .content {
@@ -171,7 +176,38 @@ h3 {
     font-size: 24px;
 }
 
-/* Exact-Post sections */
+/* Side section */
+
+.sort-widget {
+    width: 424px;
+    min-width: 424px;
+    float: none;
+    background: #fff;
+    margin: 5px 5px 0 5px;
+    border: 1px solid #dfdfdf;
+    padding: 40px 24px;
+    padding-left: 48px;
+    padding-right: 48px;
+}
+
+.sort-widget h1 {
+    font-size: 25px;
+    font-weight: 700;
+}
+
+.sort-categories {
+    margin-top: 15px;
+    max-width: 350px;
+    max-height: 220px;
+    overflow: auto;
+    display: grid;
+}
+
+.label-category {
+    font-weight: 400;
+}
+
+/* Exact-Post section */
 
 .content-post {
     border-bottom: 1px solid #dfdfdf;

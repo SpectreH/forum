@@ -46,43 +46,58 @@
         </div>
     </section>
     <section class="content-block">
-        <div class="content">
-            {{range .Posts}}
-            <article class="content-post" id="{{.PostId}}">
-                <div class="post-entry-content">
-                    <div class="post-entry-content-image">
-                        <a class="post-entry-content-image-link" href="#" aria-hidden="true">
-                            <img width="180" height="180" src="data:image/{{.Image.Type}};base64,{{.Image.Container}}" class="asdf"
-                                alt="{{.Image.Name}}" itemprop="image">
-                        </a>
-                    </div>
-                    <div class="post-entry-content-info">
-                        <header class="post-entry-header">
-                            <h2 class="post-entry-title">
-                                <a class="post-entry-title-text" href="/{{.PostId}}">{{.Title}}</a>
-                            </h2>
-                        </header>
-                        <div class="post-entry-info">
-                            Posted on
-                            <time itemprop="datePublished" datetime="2021-11-11T06:30:18Z">{{.Created}}</time>
-                            by
-                            <a class="post-entry-info-author" href="https://www.wpbeginner.com/author/wpbeginner/"
-                                title="Posts by Editorial Staff" rel="author">{{.Author}}</a>
+        <div class="content-area">
+            <div class="content">
+                {{range .Posts}}
+                <article class="content-post" id="{{.PostId}}">
+                    <div class="post-entry-content">
+                        <div class="post-entry-content-image">
+                            <a class="post-entry-content-image-link" href="#" aria-hidden="true">
+                                <img width="180" height="180" src="data:image/{{.Image.Type}};base64,{{.Image.Container}}"
+                                    class="asdf" alt="{{.Image.Name}}" itemprop="image">
+                            </a>
+                        </div>
+                        <div class="post-entry-content-info">
+                            <header class="post-entry-header">
+                                <h2 class="post-entry-title">
+                                    <a class="post-entry-title-text" href="/{{.PostId}}">{{.Title}}</a>
+                                </h2>
+                            </header>
+                            <div class="post-entry-info">
+                                Posted on
+                                <time itemprop="datePublished" datetime="2021-11-11T06:30:18Z">{{.Created}}</time>
+                                by
+                                <a class="post-entry-info-author" href="https://www.wpbeginner.com/author/wpbeginner/"
+                                    title="Posts by Editorial Staff" rel="author">{{.Author}}</a>
+                            </div>
                         </div>
                     </div>
-                </div>
-                <div class="post-entry-categories-section">
-                    <div class="post-entry-categories-header">Categories</div>
-                    <div class="post-entry-categories">
+                    <div class="post-entry-categories-section">
+                        <div class="post-entry-categories-header">Categories</div>
+                        <div class="post-entry-categories">
+                            {{range .Categories}}
+                            <div class="category-box" style="display: none;"><a class="category-box-content" type="category"
+                                    rel="nofollow" href="#">{{.}}</a></div>
+                            {{end}}
+                        </div>
+                    </div>
+                    <footer class="post-entry-footer"></footer>
+                </article>
+                {{end}}
+            </div>
+            <aside class="sidebar">
+                <div class="sort-widget">
+                    <h1>Sort By Categories</h1>
+                    <div class="sort-categories">
                         {{range .Categories}}
-                        <div class="category-box" style="display: none;"><a class="category-box-content" type="category" rel="nofollow"
-                                href="#">{{.}}</a></div>
+                        <label class="label-category">
+                            <input type="checkbox" id="{{.}}">
+                            {{.}}
+                        </label>
                         {{end}}
                     </div>
                 </div>
-                <footer class="post-entry-footer"></footer>
-            </article>
-            {{end}}
+            </aside>
         </div>
     </section>
 </body>

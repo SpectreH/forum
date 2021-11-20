@@ -59,10 +59,11 @@ type Login struct {
 }
 
 type MainPage struct {
-	Message   string
-	AlertType string
-	Posts     []Post
-	LoggedIn  bool
+	Message    string
+	AlertType  string
+	Posts      []Post
+	Categories []string
+	LoggedIn   bool
 }
 
 type PostPage struct {
@@ -170,14 +171,17 @@ func LoadMainPage(w http.ResponseWriter, r *http.Request) {
 	db, err := sql.Open("sqlite3", "./db/forum.db")
 	CheckErr(err)
 
-	MAINPAGEDATA.Posts = CollectAllPostsData(db)
+	fmt.Println(err)
 
-	db.Close()
+	MAINPAGEDATA.Posts = CollectAllPostsData(db)
+	MAINPAGEDATA.Categories = sqlitecommands.GetAllCategoriesFromTable(db)
 
 	CheckForCookies(r, w)
 	if err := templ.Execute(w, MAINPAGEDATA); err != nil {
 		panic(err)
 	}
+
+	db.Close()
 
 	MAINPAGEDATA = MainPage{
 		Message:   "",
@@ -521,8 +525,6 @@ func CollectAllPostsData(db *sql.DB) []Post {
 
 		result = append(result, post)
 	}
-
-	db.Close()
 
 	return result
 }

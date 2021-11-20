@@ -234,6 +234,27 @@ func GetUserIdByCookies(db *sql.DB, r *http.Request, w http.ResponseWriter) int 
 	return -1
 }
 
+func GetAllCategoriesFromTable(db *sql.DB) []string {
+	var result []string
+
+	sqlStmt := "SELECT category FROM categories"
+	rows, err := db.Query(sqlStmt)
+	CheckErr(err)
+
+	for rows.Next() {
+		var category string
+
+		err := rows.Scan(&category)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		result = append(result, category)
+	}
+
+	return result
+}
+
 func FindSameCategory(db *sql.DB, category string) bool {
 	sqlStmt := "SELECT category FROM categories WHERE category = ?"
 	err := db.QueryRow(sqlStmt, category).Scan(&category)
