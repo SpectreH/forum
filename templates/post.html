@@ -12,7 +12,7 @@
   <title>Forum - Post</title>
 </head>
 
-<body style="margin: 0; background: #f0f0f0;" onload="InitMainPage(loggedIn, messageType, alertMessage); InitPostPage(liked, disLiked);">
+<body style="margin: 0; background: #f0f0f0;" onload="InitButtons(loggedIn); InitPostPage(liked, disLiked, loggedIn);">
   <header class="header-block">
     <nav class="header-nav">
       <a href="/" class="header-link">
@@ -113,10 +113,10 @@
         </article>
       </section>
       <section class="post-new-comment-section">
-        <div class="login-message">
-          <h1 class="new-comment-login" style="display: none;">Login to add new comment!</h1>
+        <div class="login-message" id="login-message" style="display: none;">
+          <h1 class="new-comment-login">Login to add new comment!</h1>
         </div>
-        <div class="new-comment">
+        <div class="new-comment" id="new-comment" style="display: none;">
           <h3>
             <svg width="24px" height="24px" viewBox="0 0 477.381 477.382">
               <path d="M477.381,103.373c0-54.988-44.577-99.564-99.565-99.564c-53.146,0-96.562,41.64-99.413,94.074
@@ -133,12 +133,12 @@
             </svg>
             Leave a comment
           </h3>
-          <form class="new-comment-form" action="#" method="post">
+          <form class="new-comment-form" method="post" id="commentForm">
             <div>
-              <textarea class="new-comment-textarea" name="comment" id="comment"></textarea>
+              <textarea class="new-comment-textarea" name="comment" id="comment" required></textarea>
             </div>
-            <input class="new-comment-submit" style="width: fit-content;" type="submit" value="Submit">
           </form>
+          <button class="new-comment-submit" style="width: fit-content;" onclick="SubmitForm(loggedIn)" value="Submit">Submit</button>
         </div>
       </section>
       <section class="post-comments-section">

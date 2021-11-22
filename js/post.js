@@ -1,4 +1,4 @@
-function InitPostPage(liked, disliked) {
+function InitPostPage(liked, disliked, loggedIn) {
   if (liked == "true") {
     var element = document.getElementById("like");
     element.setAttribute("value", "liked");
@@ -8,13 +8,20 @@ function InitPostPage(liked, disliked) {
     element.setAttribute("value", "disliked");
     element.setAttribute("style", "background-color: #f74c4c;");
   }
-}
 
+  if (loggedIn == "false") {
+    document.getElementById("new-comment").remove();
+    document.getElementById("login-message").style.display = "block"
+  } else {
+    document.getElementById("new-comment").style.display = "grid"
+    document.getElementById("login-message").remove();
+  }
+}
 
 let code
 function SetLiked(loggedIn, element) {
   if (loggedIn == "false") {
-    GenerateAlertBox("NotLoggedIn", "Please log in to rate the post!")
+    GenerateAlertBox("NotLoggedIn", "Please login to rate the post!")
     return
   }
 
@@ -32,12 +39,12 @@ function SetLiked(loggedIn, element) {
     code = 2
   }
 
-  postfunction(code)
+  SendPostRequest(code)
 }
 
 function SetDisLiked(loggedIn, element) {
   if (loggedIn == "false") {
-    GenerateAlertBox("NotLoggedIn", "Please log in to rate the post!")
+    GenerateAlertBox("NotLoggedIn", "Please login to rate the post!")
     return
   }
 
@@ -55,7 +62,27 @@ function SetDisLiked(loggedIn, element) {
     code = -2
   }
 
-  postfunction(code)
+  SendPostRequest(code)
+}
+
+function SubmitForm(loggedIn) {
+  console.log(loggedIn)
+
+  if (loggedIn == "false") {
+    GenerateAlertBox("NotLoggedIn", "Please login to add comment!")
+    return
+  }
+
+  var form = document.getElementById("commentForm")
+
+  for (i = 0; i < form.length; i++) {
+    if (form[i].checkValidity() == false) {
+      form[i].reportValidity();
+      return
+    }
+  }
+
+  form.submit();
 }
 
 function ClearRating(element) {
@@ -67,7 +94,7 @@ function ClearRating(element) {
   element.setAttribute("style", "background-color: none;");
 }
 
-function postfunction(code) {
+function SendPostRequest(code) {
   var ajax = new XMLHttpRequest();
   ajax.open("POST", "/1", true);
   ajax.send(code);

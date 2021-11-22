@@ -12,7 +12,7 @@
   <title>Forum - New Post</title>
 </head>
 
-<body style="margin: 0; background: #f0f0f0;" onload="InitMainPage(loggedIn, messageType, alertMessage); ">
+<body style="margin: 0; background: #f0f0f0;" onload="InitButtons(loggedIn)">
   <header class="header-block">
     <nav class="header-nav">
       <a href="/" class="header-link">
@@ -64,7 +64,7 @@
               </div>
             </div>
         </form>
-        <button class="new-post-submit" onclick="SubmitForm()">Publish</button>
+        <button class="new-post-submit" onclick="SubmitForm(loggedIn)">Publish</button>
       </main>
       <aside class="new-sidebar">
         <div class="categories-widget">

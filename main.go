@@ -292,6 +292,10 @@ func LoadPostPage(w http.ResponseWriter, r *http.Request) {
 	CheckErr(err)
 
 	if r.Method == "POST" {
+		if !CheckForCookies(r, w) {
+			return
+		}
+
 		authorId := sqlitecommands.GetUserIdByCookies(db, r, w)
 		date := time.Now().Format("2006-01-02 15:04:05")
 
@@ -361,11 +365,11 @@ func LoadNewPostPage(w http.ResponseWriter, r *http.Request) {
 		imageContainer := CreateImageContainer(data)
 
 		sqlitecommands.UpdatePostsTable(db, authorId, postTitle, postContent, date, postImageData[0], imageContainer, postImageData[1], postCategories)
-
 		db.Close()
-	}
 
-	CheckForCookies(r, w)
+		RedirectToMainPage(r, w, "You have successfully added a new post!", "newPost")
+		return
+	}
 
 	if err := templ.Execute(w, MAINPAGEDATA); err != nil {
 		panic(err)

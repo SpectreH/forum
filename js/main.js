@@ -2,8 +2,11 @@ function InitMainPage(loggedIn, messageType, alertMessage) {
   GenerateAlertBox(messageType, alertMessage)
   SetCategories()
 
-  document.getElementById("header-list").style.display = "flex";
+  InitButtons(loggedIn)
+}
 
+function InitButtons(loggedIn) {
+  document.getElementById("header-list").style.display = "flex";
   if (loggedIn == "true") {
     ChangeButtons()
   }
@@ -105,7 +108,7 @@ function GenerateAlertBox(messageType, alertMessage) {
     document.getElementsByTagName("h1").namedItem("alert-text").innerHTML = alertMessage;
     element.style.display = "flex";
 
-    if (messageType != "Login" && messageType != "Register" && messageType != "Logout") {
+    if (messageType != "Login" && messageType != "Register" && messageType != "Logout" && messageType != "newPost") {
       document.getElementsByTagName("h1").namedItem("alert-text").style.backgroundColor = "rgba(211, 10, 10, 0.85)";
       document.getElementsByTagName("h1").namedItem("alert-text").style.border = "2px solid rgba(211, 10, 10, 0.85)";
     }
