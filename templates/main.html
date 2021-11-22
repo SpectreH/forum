@@ -5,8 +5,12 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="//code.jquery.com/jquery-1.10.2.js"></script>
+    <script src="//code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
+    <link href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/themes/base/jquery-ui.css" rel="stylesheet" type="text/css" />
     <link rel="stylesheet" href="/css/main.css" />
     <script type="text/javascript" src="/js/main.js"></script>
+    <script type="text/javascript" src="/js/filter.js"></script>
     <title>Forum - Main</title>
 </head>
 
@@ -47,9 +51,9 @@
     </section>
     <section class="content-block">
         <div class="content-area">
-            <div class="content">
+            <div class="content" id="posts">
                 {{range .Posts}}
-                <article class="content-post" id="{{.PostId}}">
+                <article class="content-post" id="{{.PostId}}" categories="{{range .Categories}}{{.}};{{end}}">
                     <div class="post-entry-content">
                         <div class="post-entry-content-image">
                             <a class="post-entry-content-image-link" href="#" aria-hidden="true">
@@ -91,7 +95,7 @@
                     <div class="sort-categories">
                         {{range .Categories}}
                         <label class="label-category">
-                            <input type="checkbox" id="{{.}}">
+                            <input type="checkbox" category="{{.}}">
                             {{.}}
                         </label>
                         {{end}}
@@ -101,11 +105,9 @@
         </div>
     </section>
 </body>
-
 <script>
     var loggedIn = "{{.LoggedIn}}"
     var messageType = "{{.AlertType}}"
     var alertMessage = "{{.Message}}"
 </script>
-
 </html>

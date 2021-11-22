@@ -171,8 +171,6 @@ func LoadMainPage(w http.ResponseWriter, r *http.Request) {
 	db, err := sql.Open("sqlite3", "./db/forum.db")
 	CheckErr(err)
 
-	fmt.Println(err)
-
 	MAINPAGEDATA.Posts = CollectAllPostsData(db)
 	MAINPAGEDATA.Categories = sqlitecommands.GetAllCategoriesFromTable(db)
 
@@ -356,7 +354,6 @@ func LoadNewPostPage(w http.ResponseWriter, r *http.Request) {
 		postTitle := r.FormValue("title")
 		postCategories := strings.Split(r.FormValue("categories"), ",")
 		postContent := base64.StdEncoding.EncodeToString([]byte(r.FormValue("new-content")))
-		fmt.Println([]byte(r.FormValue("new-content")))
 		date := time.Now().Format("2006-01-02 15:04:05")
 
 		_, data, _ := r.FormFile("myImage")
