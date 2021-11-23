@@ -30,6 +30,23 @@
   padding: 20px 0;
 }
 
+/* Post categories section  */
+
+.post-categories-header {
+  text-align: center;
+  font-size: 17px;
+  color: #999;
+  margin: 10px 0;
+}
+
+.post-categories {
+  justify-content: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+
 /* Post new comment section */
 
 .new-comment-login {

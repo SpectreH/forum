@@ -1,11 +1,11 @@
-function InitMainPage(loggedIn, messageType, alertMessage) {
+function InitMainPage() {
   GenerateAlertBox(messageType, alertMessage)
   SetCategories()
-
-  InitButtons(loggedIn)
+  ShowExtraFilters()
+  InitButtons()
 }
 
-function InitButtons(loggedIn) {
+function InitButtons() {
   document.getElementById("header-list").style.display = "flex";
   if (loggedIn == "true") {
     ChangeButtons()
@@ -19,6 +19,14 @@ function ChangeButtons() {
   document.getElementById("registration-link").href = "/new"
 
   CreateLogOutButton()
+}
+
+function ShowExtraFilters() {
+  if (loggedIn == "true") {
+    document.getElementById("sort-extra").style.display = "grid";
+  } else {
+    document.getElementById("sort-extra").remove();
+  }
 }
 
 function CreateLogOutButton() {
@@ -74,8 +82,8 @@ function CreateShowMoreCatButton(element, lenght) {
   a.classList.add("category-box-content");
   a.setAttribute('type', "category");
   a.setAttribute('rel', "nofollow");
-  a.setAttribute('onclick', "ShowAllCategories(this)");
-  a.setAttribute('href', "#");
+  a.setAttribute('onclick', "ShowAllCategories(this); return false;");
+  a.setAttribute('href', "");
 
   a.appendChild(node);
   div.appendChild(a);
@@ -94,7 +102,7 @@ function ShowAllCategories(element) {
 
 let ALERT_TIMER;
 let TIME_OUT;
-function GenerateAlertBox(messageType, alertMessage) {
+function GenerateAlertBox(type, message) {
   element = document.getElementsByTagName("div").namedItem("alert");
 
   if (element.style.display == "flex") {
@@ -102,13 +110,13 @@ function GenerateAlertBox(messageType, alertMessage) {
     clearTimeout(TIME_OUT);
   }
 
-  if (messageType != "") {
+  if (type != "") {
     element.style.opacity = 1;
     element = document.getElementsByTagName("div").namedItem("alert");
-    document.getElementsByTagName("h1").namedItem("alert-text").innerHTML = alertMessage;
+    document.getElementsByTagName("h1").namedItem("alert-text").innerHTML = message;
     element.style.display = "flex";
 
-    if (messageType != "Login" && messageType != "Register" && messageType != "Logout" && messageType != "newPost") {
+    if (type != "Login" && type != "Register" && type != "Logout" && type != "newPost") {
       document.getElementsByTagName("h1").namedItem("alert-text").style.backgroundColor = "rgba(211, 10, 10, 0.85)";
       document.getElementsByTagName("h1").namedItem("alert-text").style.border = "2px solid rgba(211, 10, 10, 0.85)";
     }

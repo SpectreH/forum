@@ -1,4 +1,4 @@
-function ReturnData(nameError, emailError, username, email) {
+function ReturnData() {
   if (nameError == "true" || emailError == "true") {
     document.getElementById("username").value = username
     document.getElementById("email").value = email

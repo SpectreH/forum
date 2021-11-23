@@ -37,6 +37,8 @@ type Post struct {
 	Comments   int
 	Categories []string
 	Image      Image
+	Liked      bool
+	Disliked   bool
 }
 
 type Comment struct {
@@ -64,6 +66,7 @@ type MainPage struct {
 	Posts      []Post
 	Categories []string
 	LoggedIn   bool
+	Username   string
 }
 
 type PostPage struct {
@@ -72,8 +75,6 @@ type PostPage struct {
 	Post      Post
 	Comments  []Comment
 	LoggedIn  bool
-	Like      bool
-	Dislike   bool
 }
 
 var MAINPAGEDATA MainPage
@@ -173,6 +174,24 @@ func LoadMainPage(w http.ResponseWriter, r *http.Request) {
 
 	MAINPAGEDATA.Posts = CollectAllPostsData(db)
 	MAINPAGEDATA.Categories = sqlitecommands.GetAllCategoriesFromTable(db)
+
+	MAINPAGEDATA.LoggedIn = CheckForCookies(r, w)
+	MAINPAGEDATA.Username = "-1"
+
+	var userId int
+	if MAINPAGEDATA.LoggedIn {
+		userId = sqlitecommands.GetUserIdByCookies(db, r, w)
+		MAINPAGEDATA.Username = sqlitecommands.GetUserNameFromTable(db, userId)
+	}
+	for i := 0; i < len(MAINPAGEDATA.Posts); i++ {
+		if MAINPAGEDATA.LoggedIn == true {
+			MAINPAGEDATA.Posts[i].Liked = sqlitecommands.GetUserScoreOnPost(db, MAINPAGEDATA.Posts[i].PostId, userId, "posts_likes")
+			MAINPAGEDATA.Posts[i].Disliked = sqlitecommands.GetUserScoreOnPost(db, MAINPAGEDATA.Posts[i].PostId, userId, "posts_dislikes")
+		} else {
+			MAINPAGEDATA.Posts[i].Liked = false
+			MAINPAGEDATA.Posts[i].Disliked = false
+		}
+	}
 
 	CheckForCookies(r, w)
 	if err := templ.Execute(w, MAINPAGEDATA); err != nil {
@@ -325,11 +344,11 @@ func LoadPostPage(w http.ResponseWriter, r *http.Request) {
 	postPageData.Post = CollectPostData(db)
 	postPageData.LoggedIn = CheckForCookies(r, w)
 	if postPageData.LoggedIn == true {
-		postPageData.Like = sqlitecommands.GetUserScoreOnPost(db, POSTID, sqlitecommands.GetUserIdByCookies(db, r, w), "posts_likes")
-		postPageData.Dislike = sqlitecommands.GetUserScoreOnPost(db, POSTID, sqlitecommands.GetUserIdByCookies(db, r, w), "posts_dislikes")
+		postPageData.Post.Liked = sqlitecommands.GetUserScoreOnPost(db, POSTID, sqlitecommands.GetUserIdByCookies(db, r, w), "posts_likes")
+		postPageData.Post.Disliked = sqlitecommands.GetUserScoreOnPost(db, POSTID, sqlitecommands.GetUserIdByCookies(db, r, w), "posts_dislikes")
 	} else {
-		postPageData.Like = false
-		postPageData.Dislike = false
+		postPageData.Post.Liked = false
+		postPageData.Post.Disliked = false
 	}
 
 	postPageData.Comments = CollectAllPostComments(db, POSTID)

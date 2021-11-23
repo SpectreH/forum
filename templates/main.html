@@ -12,7 +12,7 @@
     <title>Forum - Main</title>
 </head>
 
-<body style="margin: 0; background: #f0f0f0;" onload="InitMainPage(loggedIn, messageType, alertMessage);">
+<body style="margin: 0; background: #f0f0f0;" onload="InitMainPage();">
     <header class="header-block">
         <nav class="header-nav">
             <a href="/" class="header-link">
@@ -51,10 +51,10 @@
         <div class="content-area">
             <div class="content" id="posts">
                 {{range .Posts}}
-                <article class="content-post" id="{{.PostId}}" categories="{{range .Categories}}{{.}};{{end}}">
+                <article class="content-post" id="{{.PostId}}" data-author="{{.Author}}" data-liked="{{.Liked}}" data-disliked="{{.Disliked}}" categories="{{range .Categories}}{{.}};{{end}}">
                     <div class="post-entry-content">
                         <div class="post-entry-content-image">
-                            <a class="post-entry-content-image-link" href="#" aria-hidden="true">
+                            <a class="post-entry-content-image-link" href="/{{.PostId}}" aria-hidden="true">
                                 <img width="180" height="180" src="data:image/{{.Image.Type}};base64,{{.Image.Container}}"
                                     class="asdf" alt="{{.Image.Name}}" itemprop="image">
                             </a>
@@ -70,20 +70,19 @@
                                 <time itemprop="datePublished" datetime="2021-11-11T06:30:18Z">{{.Created}}</time>
                                 by
                                 <a class="post-entry-info-author" href="https://www.wpbeginner.com/author/wpbeginner/"
-                                    title="Posts by Editorial Staff" rel="author">{{.Author}}</a>
+                                    title="Posted by {{.Author}}" rel="author">{{.Author}}</a>
+                            </div>
+                            <div class="post-entry-categories-section">
+                                <div class="post-entry-categories-header">Categories</div>
+                                <div class="post-entry-categories">
+                                    {{range .Categories}}
+                                    <div class="category-box" style="display: none;"><a class="category-box-content" type="category" rel="nofollow"
+                                            href="#">{{.}}</a></div>
+                                    {{end}}
+                                </div>
                             </div>
                         </div>
                     </div>
-                    <div class="post-entry-categories-section">
-                        <div class="post-entry-categories-header">Categories</div>
-                        <div class="post-entry-categories">
-                            {{range .Categories}}
-                            <div class="category-box" style="display: none;"><a class="category-box-content" type="category"
-                                    rel="nofollow" href="#">{{.}}</a></div>
-                            {{end}}
-                        </div>
-                    </div>
-                    <footer class="post-entry-footer"></footer>
                 </article>
                 {{end}}
             </div>
@@ -98,12 +97,27 @@
                         </label>
                         {{end}}
                     </div>
+                    <div class="sort-extra" id="sort-extra" style="display: none;">
+                        <label class="label-extra">
+                            <input type="checkbox" value="liked">
+                            Show your liked posts
+                        </label>
+                        <label class="label-extra">
+                            <input type="checkbox" value="disliked">
+                            Show your disliked posts
+                        </label>
+                        <label class="label-extra">
+                            <input type="checkbox" value="created">
+                            Show your created posts
+                        </label>
+                    </div>
                 </div>
             </aside>
         </div>
     </section>
 </body>
 <script>
+    var username = "{{.Username}}"
     var loggedIn = "{{.LoggedIn}}"
     var messageType = "{{.AlertType}}"
     var alertMessage = "{{.Message}}"

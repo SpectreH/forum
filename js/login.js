@@ -1,4 +1,4 @@
-function ReturnData(loginErr, passErr, login) {
+function ReturnData() {
   if (loginErr != "true") {
     document.getElementById("login").value = login
   }

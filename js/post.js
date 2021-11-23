@@ -1,9 +1,9 @@
-function InitPostPage(liked, disliked, loggedIn) {
+function InitPostPage() {
   if (liked == "true") {
     var element = document.getElementById("like");
     element.setAttribute("value", "liked");
     element.setAttribute("style", "background-color: #87e98a;");
-  } else if (disliked == "true") {
+  } else if (disLiked == "true") {
     var element = document.getElementById("dislike");
     element.setAttribute("value", "disliked");
     element.setAttribute("style", "background-color: #f74c4c;");
@@ -19,7 +19,7 @@ function InitPostPage(liked, disliked, loggedIn) {
 }
 
 let code
-function SetLiked(loggedIn, element) {
+function SetLiked(element) {
   if (loggedIn == "false") {
     GenerateAlertBox("NotLoggedIn", "Please login to rate the post!")
     return
@@ -42,7 +42,7 @@ function SetLiked(loggedIn, element) {
   SendPostRequest(code)
 }
 
-function SetDisLiked(loggedIn, element) {
+function SetDisLiked(element) {
   if (loggedIn == "false") {
     GenerateAlertBox("NotLoggedIn", "Please login to rate the post!")
     return
@@ -62,10 +62,10 @@ function SetDisLiked(loggedIn, element) {
     code = -2
   }
 
-  SendPostRequest(code)
+  SendPostRequest(code, postId)
 }
 
-function SubmitForm(loggedIn) {
+function SubmitForm() {
   console.log(loggedIn)
 
   if (loggedIn == "false") {
@@ -95,7 +95,8 @@ function ClearRating(element) {
 }
 
 function SendPostRequest(code) {
+  var id = "/" + postId
   var ajax = new XMLHttpRequest();
-  ajax.open("POST", "/1", true);
+  ajax.open("POST", id, true);
   ajax.send(code);
 }
