@@ -42,9 +42,14 @@ type Post struct {
 }
 
 type Comment struct {
-	Author  string
-	Created string
-	Body    []string
+	Id       int
+	Author   string
+	Created  string
+	Body     []string
+	Likes    int
+	Dislikes int
+	Liked    string
+	Disliked string
 }
 
 type Registration struct {
@@ -325,15 +330,31 @@ func LoadPostPage(w http.ResponseWriter, r *http.Request) {
 			var b []byte
 			b, _ = ioutil.ReadAll(r.Body)
 
-			if string(b) == "1" { // Like
-				sqlitecommands.UpdateRatingsTable(db, POSTID, authorId, "add", "posts_likes")
-			} else if string(b) == "2" { // Remove Like
-				sqlitecommands.UpdateRatingsTable(db, POSTID, authorId, "remove", "posts_likes")
-			} else if string(b) == "-1" { // DisLike
-				sqlitecommands.UpdateRatingsTable(db, POSTID, authorId, "add", "posts_dislikes")
-			} else if string(b) == "-2" { // Remove DisLike
-				sqlitecommands.UpdateRatingsTable(db, POSTID, authorId, "remove", "posts_dislikes")
+			rateDataSep := strings.Split(string(b), ";")
+			id, _ := strconv.Atoi(rateDataSep[2])
+
+			if rateDataSep[0] == "post" {
+				if string(rateDataSep[1]) == "1" { // Like
+					sqlitecommands.UpdatePostRatingsTable(db, id, authorId, "add", "posts_likes")
+				} else if string(rateDataSep[1]) == "2" { // Remove Like
+					sqlitecommands.UpdatePostRatingsTable(db, id, authorId, "remove", "posts_likes")
+				} else if string(rateDataSep[1]) == "-1" { // DisLike
+					sqlitecommands.UpdatePostRatingsTable(db, id, authorId, "add", "posts_dislikes")
+				} else if string(rateDataSep[1]) == "-2" { // Remove DisLike
+					sqlitecommands.UpdatePostRatingsTable(db, id, authorId, "remove", "posts_dislikes")
+				}
+			} else {
+				if string(rateDataSep[1]) == "1" { // Like
+					sqlitecommands.UpdateCommentRatingsTable(db, id, authorId, "add", "comment_likes")
+				} else if string(rateDataSep[1]) == "2" { // Remove Like
+					sqlitecommands.UpdateCommentRatingsTable(db, id, authorId, "remove", "comment_likes")
+				} else if string(rateDataSep[1]) == "-1" { // DisLike
+					sqlitecommands.UpdateCommentRatingsTable(db, id, authorId, "add", "comment_dislikes")
+				} else if string(rateDataSep[1]) == "-2" { // Remove DisLike
+					sqlitecommands.UpdateCommentRatingsTable(db, id, authorId, "remove", "comment_dislikes")
+				}
 			}
+
 			db.Close()
 			return
 		}
@@ -351,7 +372,7 @@ func LoadPostPage(w http.ResponseWriter, r *http.Request) {
 		postPageData.Post.Disliked = false
 	}
 
-	postPageData.Comments = CollectAllPostComments(db, POSTID)
+	postPageData.Comments = CollectAllPostComments(db, POSTID, w, r)
 	db.Close()
 
 	if err := templ.Execute(w, postPageData); err != nil {
@@ -549,11 +570,16 @@ func CollectAllPostsData(db *sql.DB) []Post {
 	return result
 }
 
-func CollectAllPostComments(db *sql.DB, postId int) []Comment {
+func CollectAllPostComments(db *sql.DB, postId int, w http.ResponseWriter, r *http.Request) []Comment {
 	var result []Comment
+	var userId int = -1
 
 	rows, err := db.Query("SELECT * FROM posts_comments WHERE post_id = ?", postId)
 	CheckErr(err)
+
+	if CheckForCookies(r, w) {
+		userId = sqlitecommands.GetUserIdByCookies(db, r, w)
+	}
 
 	for rows.Next() {
 		var comment Comment
@@ -561,14 +587,23 @@ func CollectAllPostComments(db *sql.DB, postId int) []Comment {
 		var date time.Time
 		var id, postId, authorId int
 
-		err := rows.Scan(&id, &postId, &authorId, &date, &body)
+		err := rows.Scan(&id, &postId, &authorId, &comment.Likes, &comment.Dislikes, &date, &body)
 		if err != nil {
 			log.Fatal(err)
 		}
 
+		comment.Id = id
 		comment.Author = sqlitecommands.GetUserNameFromTable(db, authorId)
 		comment.Created = date.Format("January 02, 2006 at 15:04")
 		comment.Body = DivideBodyIntoParagraphs(body)
+
+		if userId != -1 {
+			if sqlitecommands.GetUserScoreOnComment(db, comment.Id, userId, "comment_likes") {
+				comment.Liked = "liked"
+			} else if sqlitecommands.GetUserScoreOnComment(db, comment.Id, userId, "comment_dislikes") {
+				comment.Disliked = "disliked"
+			}
+		}
 
 		result = append(result, comment)
 	}

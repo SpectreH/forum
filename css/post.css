@@ -82,7 +82,7 @@
 
 /* Post rate section */
 
-.post-rate-buttons {
+.post-rate-buttons, .comment-rate-buttons {
   padding: 60px 0 0 0;
   display: flex;
   place-content: center;
@@ -178,4 +178,10 @@
   border-radius: 5px;
   font-size: 15px;
   padding: 24px;
+}
+
+.comment-top {
+  align-items: center; 
+  display: flex;
+  place-content: space-between; 
 }

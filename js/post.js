@@ -1,12 +1,18 @@
 function InitPostPage() {
+  rateButtons = document.getElementsByClassName("rate-button")
   if (liked == "true") {
-    var element = document.getElementById("like");
-    element.setAttribute("value", "liked");
-    element.setAttribute("style", "background-color: #87e98a;");
+    document.getElementById("post-like").setAttribute("value", "liked")
   } else if (disLiked == "true") {
-    var element = document.getElementById("dislike");
-    element.setAttribute("value", "disliked");
-    element.setAttribute("style", "background-color: #f74c4c;");
+    document.getElementById("post-dislike").setAttribute("value", "disliked")
+  }
+
+  for (i = 0; i < rateButtons.length; i++) {
+    var value = rateButtons[i].getAttribute("value")
+    if (value == "liked") {
+      rateButtons[i].setAttribute("style", "background-color: #87e98a;");
+    } else if (value == "disliked") {
+      rateButtons[i].setAttribute("style", "background-color: #f74c4c;");
+    }
   }
 
   if (loggedIn == "false") {
@@ -19,10 +25,19 @@ function InitPostPage() {
 }
 
 let code
-function SetLiked(element) {
+function SetLiked(element, type) {
   if (loggedIn == "false") {
     GenerateAlertBox("NotLoggedIn", "Please login to rate the post!")
     return
+  }
+
+  var mirrorButton, id
+  if (type == "comment") {
+    id = element.getAttribute("comment-id")
+    mirrorButton = document.getElementById(id + "-dislike")
+  } else {
+    id = postId
+    mirrorButton = document.getElementById("post-dislike")
   }
 
   if (element.value != "liked") {
@@ -33,19 +48,28 @@ function SetLiked(element) {
     var counter = element.childNodes[3].innerHTML;
     element.childNodes[3].innerHTML = parseInt(counter, 10) + 1;
 
-    ClearRating(document.getElementById("dislike"));
+    ClearRating(mirrorButton);
   } else {
     ClearRating(element);
     code = 2
   }
 
-  SendPostRequest(code)
+  SendPostRequest(code, type, id)
 }
 
-function SetDisLiked(element) {
+function SetDisLiked(element, type) {
   if (loggedIn == "false") {
     GenerateAlertBox("NotLoggedIn", "Please login to rate the post!")
     return
+  }
+
+  var mirrorButton, id
+  if (type == "comment") {
+    id = element.getAttribute("comment-id")
+    mirrorButton = document.getElementById(id + "-like")
+  } else {
+    id = postId
+    mirrorButton = document.getElementById("post-like")
   }
 
   if (element.value != "disliked") {
@@ -56,13 +80,13 @@ function SetDisLiked(element) {
     var counter = element.childNodes[3].innerHTML;
     element.childNodes[3].innerHTML = parseInt(counter, 10) + 1;
 
-    ClearRating(document.getElementById("like"));
+    ClearRating(mirrorButton);
   } else {
     ClearRating(element);
     code = -2
   }
 
-  SendPostRequest(code, postId)
+  SendPostRequest(code, type, id)
 }
 
 function SubmitForm() {
@@ -94,9 +118,10 @@ function ClearRating(element) {
   element.setAttribute("style", "background-color: none;");
 }
 
-function SendPostRequest(code) {
-  var id = "/" + postId
+function SendPostRequest(code, type, id) {
+  var url = "/" + postId;
+  var data = type + ";" + code + ";" + id;
   var ajax = new XMLHttpRequest();
-  ajax.open("POST", id, true);
-  ajax.send(code);
+  ajax.open("POST", url, true);
+  ajax.send(data);
 }

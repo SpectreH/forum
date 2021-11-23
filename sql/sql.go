@@ -64,10 +64,10 @@ func UpdateCategoriesTable(db *sql.DB, categories []string) {
 func UpdatePostsCommentsTable(db *sql.DB, postId int, authorId int, created string, body string) {
 	var value int
 
-	stmt, err := db.Prepare("INSERT INTO posts_comments(post_id, author_id, created, body) values(?,?,?,?)")
+	stmt, err := db.Prepare("INSERT INTO posts_comments(post_id, author_id, likes, dislikes, created, body) values(?,?,?,?,?,?)")
 	CheckErr(err)
 
-	_, err = stmt.Exec(postId, authorId, created, body)
+	_, err = stmt.Exec(postId, authorId, 0, 0, created, body)
 	CheckErr(err)
 
 	counterStmt := "SELECT COUNT (*) FROM posts_comments WHERE post_id = ?"
@@ -81,7 +81,60 @@ func UpdatePostsCommentsTable(db *sql.DB, postId int, authorId int, created stri
 	CheckErr(err)
 }
 
-func UpdateRatingsTable(db *sql.DB, postId int, authorId int, updateType string, table string) {
+func UpdateCommentRatingsTable(db *sql.DB, commentId int, authorId int, updateType string, table string) {
+	var stmt *sql.Stmt
+	var err error
+	var value int
+	var row, mirrorTable, mirrorRow string
+
+	if table != "comment_likes" && table != "comment_dislikes" {
+		return
+	}
+
+	if table == "comment_likes" {
+		row = "likes"
+		mirrorRow = "dislikes"
+		mirrorTable = "comment_dislikes"
+	} else {
+		row = "dislikes"
+		mirrorRow = "likes"
+		mirrorTable = "comment_likes"
+	}
+
+	if updateType == "add" {
+		stmt, err = db.Prepare("INSERT INTO " + table + "(comment_id, author_id) values(?,?)")
+		CheckErr(err)
+
+		checkStmt, err := db.Prepare("DELETE FROM " + mirrorTable + " WHERE comment_id = ? AND author_id = ?")
+		CheckErr(err)
+
+		_, err = checkStmt.Exec(commentId, authorId)
+		CheckErr(err)
+
+		updateStmtMirrow, err := db.Prepare("UPDATE posts_comments SET " + mirrorRow + " = ? WHERE id = ?")
+		CheckErr(err)
+
+		mirrorCounterStmt := "SELECT COUNT (*) FROM " + mirrorTable + " WHERE comment_id = ?"
+		_ = db.QueryRow(mirrorCounterStmt, commentId).Scan(&value)
+		_, err = updateStmtMirrow.Exec(value, commentId)
+		CheckErr(err)
+	} else {
+		stmt, err = db.Prepare("DELETE FROM " + table + " WHERE comment_id = ? AND author_id = ?")
+		CheckErr(err)
+	}
+
+	_, err = stmt.Exec(commentId, authorId)
+	CheckErr(err)
+
+	updateStmt, err := db.Prepare("UPDATE posts_comments SET " + row + " = ? WHERE id = ?")
+	CheckErr(err)
+	counterStmt := "SELECT COUNT (*) FROM " + table + " WHERE comment_id = ?"
+	_ = db.QueryRow(counterStmt, commentId).Scan(&value)
+	_, err = updateStmt.Exec(value, commentId)
+	CheckErr(err)
+}
+
+func UpdatePostRatingsTable(db *sql.DB, postId int, authorId int, updateType string, table string) {
 	var stmt *sql.Stmt
 	var err error
 	var value int
@@ -210,6 +263,19 @@ func GetUserScoreOnPost(db *sql.DB, postId int, authorId int, tableName string) 
 
 	sqlStmt := "SELECT COUNT (*) FROM " + tableName + " WHERE post_id = ? and author_id = ?"
 	_ = db.QueryRow(sqlStmt, postId, authorId).Scan(&value)
+
+	if value == 1 {
+		return true
+	}
+
+	return false
+}
+
+func GetUserScoreOnComment(db *sql.DB, commentId int, authorId int, tableName string) bool {
+	var value int
+
+	sqlStmt := "SELECT COUNT (*) FROM " + tableName + " WHERE comment_id = ? and author_id = ?"
+	_ = db.QueryRow(sqlStmt, commentId, authorId).Scan(&value)
 
 	if value == 1 {
 		return true
