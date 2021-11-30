@@ -17,11 +17,11 @@ func main() {
 
 	defer db.Close()
 
-	http.Handle("/", pages.Main{db})
-	http.Handle("/login", pages.Login{db})
-	http.Handle("/registration", pages.Registration{db})
-	http.Handle("/new", pages.New{db})
-	http.Handle("/logout", pages.Logout{db})
+	http.Handle("/", pages.Main{DB: db})
+	http.Handle("/login", pages.Login{DB: db})
+	http.Handle("/registration", pages.Registration{DB: db})
+	http.Handle("/new", pages.New{DB: db})
+	http.Handle("/logout", pages.Logout{DB: db})
 
 	css := http.FileServer(http.Dir("css"))
 	http.Handle("/css/", http.StripPrefix("/css/", css))

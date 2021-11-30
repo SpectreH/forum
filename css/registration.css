@@ -39,7 +39,7 @@
 
 .form-element {
   display: inherit;
-  height: 80px;
+  min-height: 80px;
   width: 300px;
   margin: auto;
 }

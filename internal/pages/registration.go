@@ -6,6 +6,7 @@ import (
 	"forum/internal/utility"
 	"html/template"
 	"net/http"
+	"regexp"
 	"time"
 )
 
@@ -44,20 +45,31 @@ func (data Registration) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		role := 1
 		ip := "0"
 
-		// Checks if REGDATA is already taken
+		// Checks if username or email are already taken
 		_, freeUserName := sqlitecommands.CheckDataExistence(data.DB, registrationData.Username, "username")
 		_, freeEmail := sqlitecommands.CheckDataExistence(data.DB, registrationData.Email, "email")
 
-		if freeUserName || freeEmail {
-			if freeUserName {
-				registrationData.NameErr = "Username is already taken"
-				registrationData.Username = ""
-			}
-			if freeEmail {
-				registrationData.EmailErr = "Email is already registered"
-				registrationData.Email = ""
-			}
-		} else {
+		if !ValidateUserNameInput(registrationData.Username) {
+			registrationData.NameErr = "Only letters and numbers are allowed"
+			registrationData.Username = ""
+		}
+
+		if !ValidateEmailInput(registrationData.Email) {
+			registrationData.EmailErr = "Email address format should be example@mail.com"
+			registrationData.Email = ""
+		}
+
+		if freeUserName {
+			registrationData.NameErr = "Username is already taken"
+			registrationData.Username = ""
+		}
+
+		if freeEmail {
+			registrationData.EmailErr = "Email is already registered"
+			registrationData.Email = ""
+		}
+
+		if registrationData.EmailErr == "" && registrationData.NameErr == "" {
 			sqlitecommands.UpdateUsersTable(data.DB, utility.CreateSessionToken(w), registrationData.Username, registrationData.Email, password, date, role, ip)
 			utility.RedirectToMainPage(r, w, "Account successfully created!", "Register")
 		}
@@ -66,4 +78,14 @@ func (data Registration) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if err := templ.Execute(w, registrationData); err != nil {
 		panic(err)
 	}
+}
+
+func ValidateUserNameInput(value string) bool {
+	usernameFormat := regexp.MustCompile(`^[a-zA-Z0-9]*$`)
+	return usernameFormat.MatchString(value)
+}
+
+func ValidateEmailInput(value string) bool {
+	emailFormat := regexp.MustCompile(`.+@+.+\..+`)
+	return emailFormat.MatchString(value)
 }
