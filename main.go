@@ -8,20 +8,19 @@ import (
 
 	_ "github.com/mattn/go-sqlite3"
 
+	"forum/internal/env"
 	"forum/internal/pages"
 )
 
 func main() {
-	db, err := sql.Open("sqlite3", "./db/forum.db")
-	CheckErr(err)
+	env.DB, _ = sql.Open("sqlite3", "./db/forum.db")
+	defer env.DB.Close()
 
-	defer db.Close()
-
-	http.Handle("/", pages.Main{DB: db})
-	http.Handle("/login", pages.Login{DB: db})
-	http.Handle("/registration", pages.Registration{DB: db})
-	http.Handle("/new", pages.New{DB: db})
-	http.Handle("/logout", pages.Logout{DB: db})
+	http.Handle("/", pages.Main{})
+	http.Handle("/login", pages.Login{})
+	http.Handle("/registration", pages.Registration{})
+	http.Handle("/new", pages.New{})
+	http.Handle("/logout", pages.Logout{})
 
 	css := http.FileServer(http.Dir("css"))
 	http.Handle("/css/", http.StripPrefix("/css/", css))

@@ -1,7 +1,6 @@
 package utility
 
 import (
-	"database/sql"
 	"forum/internal/env"
 	sqlitecommands "forum/internal/sql"
 	"net/http"
@@ -22,10 +21,10 @@ func CreateSessionToken(w http.ResponseWriter) string {
 	return sessionToken
 }
 
-func CheckForCookies(db *sql.DB, r *http.Request, w http.ResponseWriter) bool {
+func CheckForCookies(r *http.Request, w http.ResponseWriter) bool {
 	c, err := r.Cookie("session_token")
 	if err == nil {
-		_, checkResult := sqlitecommands.CheckDataExistence(db, c.Value, "session_token")
+		_, checkResult := sqlitecommands.CheckDataExistence(c.Value, "session_token")
 
 		if checkResult {
 			env.MAINPAGEDATA.LoggedIn = true

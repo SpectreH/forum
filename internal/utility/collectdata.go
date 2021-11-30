@@ -1,7 +1,6 @@
 package utility
 
 import (
-	"database/sql"
 	"forum/internal/env"
 	sqlitecommands "forum/internal/sql"
 	"log"
@@ -9,26 +8,28 @@ import (
 	"time"
 )
 
-func CollectPostData(db *sql.DB) env.Post {
+func CollectPostData() env.Post {
 	var post env.Post
 	var date time.Time
 	var body string
 	var authorId int
 
-	_ = db.QueryRow("SELECT * FROM posts WHERE id = ?", env.POSTID).Scan(&post.PostId, &authorId, &post.Title, &body, &date, &post.Likes, &post.DisLikes, &post.Comments)
+	_ = env.DB.QueryRow("SELECT * FROM posts WHERE id = ?", env.POSTID).Scan(&post.PostId, &authorId, &post.Title, &body, &date, &post.Likes, &post.DisLikes, &post.Comments)
 
 	post.Created = date.Format("January 02, 2006 at 15:04")
-	post.Author = sqlitecommands.GetUserNameFromTable(db, authorId)
-	post.Categories = sqlitecommands.GetPostCategoriesFromTable(db, post.PostId)
+	post.Author = sqlitecommands.GetUserName(authorId)
+	post.Categories = sqlitecommands.GetPostCategories(post.PostId)
 	post.Body = DivideBodyIntoParagraphs(body)
+	post.Likes, post.DisLikes = sqlitecommands.GetPostRatingCounter(env.POSTID)
+	post.Comments = sqlitecommands.GetPostCommentCounter(env.POSTID)
 
 	return post
 }
 
-func CollectAllPostsData(db *sql.DB) []env.Post {
+func CollectAllPostsData() []env.Post {
 	var result []env.Post
 
-	rows, err := db.Query("SELECT * FROM posts")
+	rows, err := env.DB.Query("SELECT * FROM posts")
 	CheckErr(err)
 
 	for rows.Next() {
@@ -43,10 +44,12 @@ func CollectAllPostsData(db *sql.DB) []env.Post {
 		}
 
 		post.Created = date.Format("January 02, 2006 at 15:04")
-		post.Author = sqlitecommands.GetUserNameFromTable(db, authorId)
-		post.Categories = sqlitecommands.GetPostCategoriesFromTable(db, post.PostId)
-		post.Image.Name, post.Image.Container, post.Image.Type = sqlitecommands.GetImageDataFromTable(db, post.PostId)
+		post.Author = sqlitecommands.GetUserName(authorId)
+		post.Categories = sqlitecommands.GetPostCategories(post.PostId)
+		post.Image.Name, post.Image.Container, post.Image.Type = sqlitecommands.GetImageData(post.PostId)
 		post.Body = DivideBodyIntoParagraphs(body)
+		post.Likes, post.DisLikes = sqlitecommands.GetPostRatingCounter(post.PostId)
+		post.Comments = sqlitecommands.GetPostCommentCounter(env.POSTID)
 
 		result = append(result, post)
 	}
@@ -54,15 +57,15 @@ func CollectAllPostsData(db *sql.DB) []env.Post {
 	return result
 }
 
-func CollectAllPostComments(db *sql.DB, postId int, w http.ResponseWriter, r *http.Request) []env.Comment {
+func CollectAllPostComments(postId int, w http.ResponseWriter, r *http.Request) []env.Comment {
 	var result []env.Comment
 	var userId int = -1
 
-	rows, err := db.Query("SELECT * FROM posts_comments WHERE post_id = ?", postId)
+	rows, err := env.DB.Query("SELECT * FROM posts_comments WHERE post_id = ?", postId)
 	CheckErr(err)
 
-	if CheckForCookies(db, r, w) {
-		userId = sqlitecommands.GetUserIdByCookies(db, r, w)
+	if CheckForCookies(r, w) {
+		userId = sqlitecommands.GetUserIdByCookies(r, w)
 	}
 
 	for rows.Next() {
@@ -77,14 +80,15 @@ func CollectAllPostComments(db *sql.DB, postId int, w http.ResponseWriter, r *ht
 		}
 
 		comment.Id = id
-		comment.Author = sqlitecommands.GetUserNameFromTable(db, authorId)
+		comment.Author = sqlitecommands.GetUserName(authorId)
 		comment.Created = date.Format("January 02, 2006 at 15:04")
 		comment.Body = DivideBodyIntoParagraphs(body)
+		comment.Likes, comment.Dislikes = sqlitecommands.GetCommentRatingCounter(comment.Id)
 
 		if userId != -1 {
-			if sqlitecommands.GetUserScoreOnComment(db, comment.Id, userId, "comment_likes") {
+			if sqlitecommands.GetUserScoreOnComment(comment.Id, userId, "comment_likes") {
 				comment.Liked = "liked"
-			} else if sqlitecommands.GetUserScoreOnComment(db, comment.Id, userId, "comment_dislikes") {
+			} else if sqlitecommands.GetUserScoreOnComment(comment.Id, userId, "comment_dislikes") {
 				comment.Disliked = "disliked"
 			}
 		}

@@ -1,7 +1,6 @@
 package pages
 
 import (
-	"database/sql"
 	"fmt"
 	"forum/internal/env"
 	sqlitecommands "forum/internal/sql"
@@ -11,7 +10,6 @@ import (
 )
 
 type Main struct {
-	DB *sql.DB
 }
 
 func (data Main) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -26,28 +24,28 @@ func (data Main) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	templ, _ := template.ParseFiles("templates/main.html")
 
-	env.MAINPAGEDATA.Posts = utility.CollectAllPostsData(data.DB)
-	env.MAINPAGEDATA.Categories = sqlitecommands.GetAllCategoriesFromTable(data.DB)
+	env.MAINPAGEDATA.Posts = utility.CollectAllPostsData()
+	env.MAINPAGEDATA.Categories = sqlitecommands.GetAllCategories()
 
-	env.MAINPAGEDATA.LoggedIn = utility.CheckForCookies(data.DB, r, w)
+	utility.CheckForCookies(r, w)
 	env.MAINPAGEDATA.Username = "-1"
 
 	var userId int
 	if env.MAINPAGEDATA.LoggedIn {
-		userId = sqlitecommands.GetUserIdByCookies(data.DB, r, w)
-		env.MAINPAGEDATA.Username = sqlitecommands.GetUserNameFromTable(data.DB, userId)
+		userId = sqlitecommands.GetUserIdByCookies(r, w)
+		env.MAINPAGEDATA.Username = sqlitecommands.GetUserName(userId)
 	}
+
 	for i := 0; i < len(env.MAINPAGEDATA.Posts); i++ {
-		if env.MAINPAGEDATA.LoggedIn == true {
-			env.MAINPAGEDATA.Posts[i].Liked = sqlitecommands.GetUserScoreOnPost(data.DB, env.MAINPAGEDATA.Posts[i].PostId, userId, "posts_likes")
-			env.MAINPAGEDATA.Posts[i].Disliked = sqlitecommands.GetUserScoreOnPost(data.DB, env.MAINPAGEDATA.Posts[i].PostId, userId, "posts_dislikes")
+		if env.MAINPAGEDATA.LoggedIn {
+			env.MAINPAGEDATA.Posts[i].Liked = sqlitecommands.GetUserScoreOnPost(env.MAINPAGEDATA.Posts[i].PostId, userId, "posts_likes")
+			env.MAINPAGEDATA.Posts[i].Disliked = sqlitecommands.GetUserScoreOnPost(env.MAINPAGEDATA.Posts[i].PostId, userId, "posts_dislikes")
 		} else {
 			env.MAINPAGEDATA.Posts[i].Liked = false
 			env.MAINPAGEDATA.Posts[i].Disliked = false
 		}
 	}
 
-	utility.CheckForCookies(data.DB, r, w)
 	if err := templ.Execute(w, env.MAINPAGEDATA); err != nil {
 		panic(err)
 	}

@@ -1,5 +1,7 @@
 package env
 
+import "database/sql"
+
 type Image struct {
 	Name      string
 	Type      string
@@ -51,6 +53,7 @@ type PostPage struct {
 
 var MAINPAGEDATA MainPage
 var POSTID int
+var DB *sql.DB
 
 func InitEnv() {
 	MAINPAGEDATA = MainPage{
@@ -62,8 +65,6 @@ func InitEnv() {
 }
 
 func (data MainPage) GenerateAlert(message string, alertType string) {
-	MAINPAGEDATA = MainPage{
-		Message:   message,
-		AlertType: alertType,
-	}
+	MAINPAGEDATA.Message = message
+	MAINPAGEDATA.AlertType = alertType
 }

@@ -18,10 +18,12 @@ func GetHash(pwd []byte) string {
 }
 
 func CreateImageContainer(file *multipart.FileHeader) string {
-	imageByteContainer := make([]byte, (1024 * 1024 * 2))
 	fileContent, err := file.Open()
+	if err != nil {
+		panic(err)
+	}
 
-	imageByteContainer, err = ioutil.ReadAll(fileContent)
+	imageByteContainer, err := ioutil.ReadAll(fileContent)
 	if err != nil {
 		panic(err)
 	}

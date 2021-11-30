@@ -1,7 +1,6 @@
 package utility
 
 import (
-	"database/sql"
 	"forum/internal/env"
 	sqlitecommands "forum/internal/sql"
 	"net/http"
@@ -16,15 +15,11 @@ func RedirectToMainPage(r *http.Request, w http.ResponseWriter, message string, 
 }
 
 func RedirectToPostPage(URL string) bool {
-	db, err := sql.Open("sqlite3", "./db/forum.db")
-	CheckErr(err)
-
-	first, last := sqlitecommands.GetPostsIdGap(db)
+	first, last := sqlitecommands.GetPostsIdGap()
 	if first == -1 && last == -1 {
 		return false
 	}
 
-	db.Close()
 	postId := strings.Trim(URL, "/")
 	number, err := strconv.Atoi(postId)
 	if err == nil {

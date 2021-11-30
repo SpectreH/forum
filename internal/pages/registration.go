@@ -1,7 +1,6 @@
 package pages
 
 import (
-	"database/sql"
 	sqlitecommands "forum/internal/sql"
 	"forum/internal/utility"
 	"html/template"
@@ -11,7 +10,6 @@ import (
 )
 
 type Registration struct {
-	DB *sql.DB
 }
 
 type RegistrationData struct {
@@ -25,17 +23,12 @@ func (data Registration) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	templ, _ := template.ParseFiles("templates/registration.html")
 
 	if r.Method == "GET" {
-		if utility.CheckForCookies(data.DB, r, w) {
+		if utility.CheckForCookies(r, w) {
 			utility.RedirectToMainPage(r, w, "You are already registered and logged in!", "AlreadyRegistered")
 		}
 	}
 
-	registrationData := RegistrationData{
-		NameErr:  "",
-		EmailErr: "",
-		Username: "",
-		Email:    "",
-	}
+	registrationData := RegistrationData{}
 
 	if r.Method == "POST" {
 		registrationData.Username = r.FormValue("username")
@@ -46,8 +39,8 @@ func (data Registration) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		ip := "0"
 
 		// Checks if username or email are already taken
-		_, freeUserName := sqlitecommands.CheckDataExistence(data.DB, registrationData.Username, "username")
-		_, freeEmail := sqlitecommands.CheckDataExistence(data.DB, registrationData.Email, "email")
+		_, freeUserName := sqlitecommands.CheckDataExistence(registrationData.Username, "username")
+		_, freeEmail := sqlitecommands.CheckDataExistence(registrationData.Email, "email")
 
 		if !ValidateUserNameInput(registrationData.Username) {
 			registrationData.NameErr = "Only letters and numbers are allowed"
@@ -70,7 +63,7 @@ func (data Registration) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		}
 
 		if registrationData.EmailErr == "" && registrationData.NameErr == "" {
-			sqlitecommands.UpdateUsersTable(data.DB, utility.CreateSessionToken(w), registrationData.Username, registrationData.Email, password, date, role, ip)
+			sqlitecommands.UpdateUsersTable(utility.CreateSessionToken(w), registrationData.Username, registrationData.Email, password, date, role, ip)
 			utility.RedirectToMainPage(r, w, "Account successfully created!", "Register")
 		}
 	}

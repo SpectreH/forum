@@ -1,18 +1,16 @@
 package pages
 
 import (
-	"database/sql"
 	"forum/internal/env"
 	"forum/internal/utility"
 	"net/http"
 )
 
 type Logout struct {
-	DB *sql.DB
 }
 
 func (data Logout) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	if utility.CheckForCookies(data.DB, r, w) {
+	if utility.CheckForCookies(r, w) {
 		c := http.Cookie{
 			Name:   "session_token",
 			MaxAge: -1}
