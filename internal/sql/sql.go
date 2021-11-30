@@ -300,11 +300,7 @@ func CheckExistence(tableName string) bool {
 	sqlStmt := "SELECT * FROM " + tableName
 	err := env.DB.QueryRow(sqlStmt).Scan()
 
-	if err == sql.ErrNoRows {
-		return true
-	}
-
-	return false
+	return err == sql.ErrNoRows
 }
 
 func CheckErr(err error) {

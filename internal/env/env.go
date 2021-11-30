@@ -1,6 +1,9 @@
 package env
 
-import "database/sql"
+import (
+	"database/sql"
+	"text/template"
+)
 
 type Image struct {
 	Name      string
@@ -54,6 +57,7 @@ type PostPage struct {
 var MAINPAGEDATA MainPage
 var POSTID int
 var DB *sql.DB
+var TEMPLATES map[string]*template.Template
 
 func InitEnv() {
 	MAINPAGEDATA = MainPage{
@@ -62,6 +66,8 @@ func InitEnv() {
 		Posts:     nil,
 		LoggedIn:  false,
 	}
+
+	TEMPLATES = ParseTemplates()
 }
 
 func (data MainPage) GenerateAlert(message string, alertType string) {

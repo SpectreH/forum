@@ -4,7 +4,6 @@ import (
 	"forum/internal/env"
 	sqlitecommands "forum/internal/sql"
 	"forum/internal/utility"
-	"html/template"
 	"net/http"
 
 	"golang.org/x/crypto/bcrypt"
@@ -20,8 +19,6 @@ type LoginData struct {
 }
 
 func (data Login) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	templ, _ := template.ParseFiles("templates/login.html")
-
 	if r.Method == "GET" {
 		if utility.CheckForCookies(r, w) {
 			utility.RedirectToMainPage(r, w, "You are already logged in!", "AlreadyLoged")
@@ -59,7 +56,7 @@ func (data Login) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	if err := templ.Execute(w, loginData); err != nil {
+	if err := env.TEMPLATES["login.html"].Execute(w, loginData); err != nil {
 		panic(err)
 	}
 }

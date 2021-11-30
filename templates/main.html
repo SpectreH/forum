@@ -13,6 +13,7 @@
 </head>
 
 <body style="margin: 0; background: #f0f0f0;" onload="InitMainPage();">
+	<header>{{template "logged-in-header.html"}}</header>
     <header class="header-block">
         <nav class="header-nav">
             <a href="/" class="header-link">
@@ -115,6 +116,7 @@
             </aside>
         </div>
     </section>
+    <header>{{template "footer.html"}}</header>
 </body>
 <script>
     var username = "{{.Username}}"

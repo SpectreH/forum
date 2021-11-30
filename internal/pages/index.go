@@ -5,7 +5,6 @@ import (
 	"forum/internal/env"
 	sqlitecommands "forum/internal/sql"
 	"forum/internal/utility"
-	"html/template"
 	"net/http"
 )
 
@@ -22,11 +21,8 @@ func (data Main) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	templ, _ := template.ParseFiles("templates/main.html")
-
 	env.MAINPAGEDATA.Posts = utility.CollectAllPostsData()
 	env.MAINPAGEDATA.Categories = sqlitecommands.GetAllCategories()
-
 	utility.CheckForCookies(r, w)
 	env.MAINPAGEDATA.Username = "-1"
 
@@ -46,7 +42,7 @@ func (data Main) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	if err := templ.Execute(w, env.MAINPAGEDATA); err != nil {
+	if err := env.TEMPLATES["main.html"].Execute(w, env.MAINPAGEDATA); err != nil {
 		panic(err)
 	}
 

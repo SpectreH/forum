@@ -13,6 +13,8 @@ import (
 )
 
 func main() {
+	env.InitEnv()
+
 	env.DB, _ = sql.Open("sqlite3", "./db/forum.db")
 	defer env.DB.Close()
 

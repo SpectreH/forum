@@ -5,7 +5,6 @@ import (
 	"forum/internal/env"
 	sqlitecommands "forum/internal/sql"
 	"forum/internal/utility"
-	"html/template"
 	"net/http"
 	"strings"
 	"time"
@@ -15,8 +14,6 @@ type New struct {
 }
 
 func (data New) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	templ, _ := template.ParseFiles("templates/new.html")
-
 	if !utility.CheckForCookies(r, w) {
 		utility.RedirectToMainPage(r, w, "You are not logged in!", "NotLoggedIn")
 		return
@@ -41,7 +38,7 @@ func (data New) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := templ.Execute(w, env.MAINPAGEDATA); err != nil {
+	if err := env.TEMPLATES["new.html"].Execute(w, env.MAINPAGEDATA); err != nil {
 		panic(err)
 	}
 }

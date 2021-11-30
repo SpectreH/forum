@@ -5,7 +5,6 @@ import (
 	"forum/internal/env"
 	sqlitecommands "forum/internal/sql"
 	"forum/internal/utility"
-	"html/template"
 	"io/ioutil"
 	"net/http"
 	"strconv"
@@ -14,8 +13,6 @@ import (
 )
 
 func LoadPostPage(w http.ResponseWriter, r *http.Request) {
-	templ, _ := template.ParseFiles("templates/post.html")
-
 	if r.Method == "POST" {
 		if !utility.CheckForCookies(r, w) {
 			return
@@ -79,7 +76,7 @@ func LoadPostPage(w http.ResponseWriter, r *http.Request) {
 
 	postPageData.Comments = utility.CollectAllPostComments(env.POSTID, w, r)
 
-	if err := templ.Execute(w, postPageData); err != nil {
+	if err := env.TEMPLATES["post.html"].Execute(w, postPageData); err != nil {
 		panic(err)
 	}
 }

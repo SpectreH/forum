@@ -1,9 +1,9 @@
 package pages
 
 import (
+	"forum/internal/env"
 	sqlitecommands "forum/internal/sql"
 	"forum/internal/utility"
-	"html/template"
 	"net/http"
 	"regexp"
 	"time"
@@ -20,8 +20,6 @@ type RegistrationData struct {
 }
 
 func (data Registration) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	templ, _ := template.ParseFiles("templates/registration.html")
-
 	if r.Method == "GET" {
 		if utility.CheckForCookies(r, w) {
 			utility.RedirectToMainPage(r, w, "You are already registered and logged in!", "AlreadyRegistered")
@@ -68,7 +66,7 @@ func (data Registration) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	if err := templ.Execute(w, registrationData); err != nil {
+	if err := env.TEMPLATES["registration.html"].Execute(w, registrationData); err != nil {
 		panic(err)
 	}
 }
