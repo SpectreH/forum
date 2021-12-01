@@ -22,7 +22,7 @@ type RegistrationData struct {
 func (data Registration) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "GET" {
 		if utility.CheckForCookies(r, w) {
-			utility.RedirectToMainPage(r, w, "You are already registered and logged in!", "AlreadyRegistered")
+			utility.RedirectToMainPage(r, w, "You are already registered and logged in!", "Fail_AlreadyRegistered")
 		}
 	}
 
@@ -62,7 +62,7 @@ func (data Registration) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 		if registrationData.EmailErr == "" && registrationData.NameErr == "" {
 			sqlitecommands.UpdateUsersTable(utility.CreateSessionToken(w), registrationData.Username, registrationData.Email, password, date, role, ip)
-			utility.RedirectToMainPage(r, w, "Account successfully created!", "Register")
+			utility.RedirectToMainPage(r, w, "Account successfully created!", "Success")
 		}
 	}
 

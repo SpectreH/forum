@@ -24,7 +24,7 @@ func (data Main) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	env.MAINPAGEDATA.Posts = utility.CollectAllPostsData()
 	env.MAINPAGEDATA.Categories = sqlitecommands.GetAllCategories()
 	utility.CheckForCookies(r, w)
-	env.MAINPAGEDATA.Username = "-1"
+	env.MAINPAGEDATA.Username = ""
 
 	var userId int
 	if env.MAINPAGEDATA.LoggedIn {

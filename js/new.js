@@ -6,7 +6,7 @@ function CheckFileSize(element) {
     if (fileSize < 2048000) {
       document.getElementById("imageName").innerHTML = element.files.item(0).name
     } else {
-      GenerateAlertBox("FileSize", "File too big, please select a file less than 2 mb");
+      GenerateAlertBox("Fail_FileSize", "File too big, please select a file less than 2 mb");
       element.value = null;
       document.getElementById("imageName").innerHTML = ""
     }
@@ -25,7 +25,7 @@ function SubmitForm() {
   }
 
   if (categorieForm.childElementCount < 1) {
-    GenerateAlertBox("CategoryCounter", "Require at least 1 category!");
+    GenerateAlertBox("Fail_CategoryCounter", "Require at least 1 category!");
     return
   }
 
@@ -48,12 +48,12 @@ function AddCategorie() {
   input = document.getElementById("newCategorie");
 
   if (input.value.length < 3) {
-    GenerateAlertBox("CategorySize", "New category length must be at least 3 character long!");
+    GenerateAlertBox("Fail_CategorySize", "New category length must be at least 3 character long!");
     return;
   }
   
   if (CheckCategoryDublicates(input.value)) {
-    GenerateAlertBox("CategoryDublicate", "You are already added this category!");
+    GenerateAlertBox("Fail_CategoryDublicate", "You are already added this category!");
     return;
   }
 

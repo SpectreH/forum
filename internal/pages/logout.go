@@ -1,7 +1,6 @@
 package pages
 
 import (
-	"forum/internal/env"
 	"forum/internal/utility"
 	"net/http"
 )
@@ -16,7 +15,8 @@ func (data Logout) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			MaxAge: -1}
 		http.SetCookie(w, &c)
 
-		env.MAINPAGEDATA.GenerateAlert("You have successfully logged out!", "Logout")
+		utility.RedirectToMainPage(r, w, "You have successfully logged out!", "Success")
+		return
 	}
 
 	http.Redirect(w, r, "/", http.StatusFound)

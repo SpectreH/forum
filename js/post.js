@@ -27,7 +27,7 @@ function InitPostPage() {
 let code
 function SetLiked(element, type) {
   if (loggedIn == "false") {
-    GenerateAlertBox("NotLoggedIn", "Please login to rate the post!")
+    GenerateAlertBox("Fail_NotLoggedIn", "Please login to rate the post!")
     return
   }
 
@@ -59,7 +59,7 @@ function SetLiked(element, type) {
 
 function SetDisLiked(element, type) {
   if (loggedIn == "false") {
-    GenerateAlertBox("NotLoggedIn", "Please login to rate the post!")
+    GenerateAlertBox("Fail_NotLoggedIn", "Please login to rate the post!")
     return
   }
 
@@ -93,7 +93,7 @@ function SubmitForm() {
   console.log(loggedIn)
 
   if (loggedIn == "false") {
-    GenerateAlertBox("NotLoggedIn", "Please login to add comment!")
+    GenerateAlertBox("Fail_NotLoggedIn", "Please login to add comment!")
     return
   }
 

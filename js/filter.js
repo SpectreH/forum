@@ -18,6 +18,11 @@ function ShowPostsByFilter() {
 }
 
 $(document).ready(function () {
+  let username = ""
+  if (document.getElementById("account-element") != null) {
+    username = document.getElementById("account-element").getAttribute("username")
+  }
+
   // Category filter section
   $('div.sort-categories').delegate('input:checkbox', 'change', function () {
     categoriesPosts = ClearArr();

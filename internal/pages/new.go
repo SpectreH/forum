@@ -15,7 +15,7 @@ type New struct {
 
 func (data New) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if !utility.CheckForCookies(r, w) {
-		utility.RedirectToMainPage(r, w, "You are not logged in!", "NotLoggedIn")
+		utility.RedirectToMainPage(r, w, "You are not logged in!", "Fail_NotLoggedIn")
 		return
 	}
 
@@ -34,7 +34,7 @@ func (data New) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 		sqlitecommands.UpdatePostsTable(authorId, postTitle, postContent, date, postImageData[0], imageContainer, postImageData[1], postCategories)
 
-		utility.RedirectToMainPage(r, w, "You have successfully added a new post!", "newPost")
+		utility.RedirectToMainPage(r, w, "You have successfully added a new post!", "Success")
 		return
 	}
 

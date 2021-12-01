@@ -21,7 +21,7 @@ type LoginData struct {
 func (data Login) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "GET" {
 		if utility.CheckForCookies(r, w) {
-			utility.RedirectToMainPage(r, w, "You are already logged in!", "AlreadyLoged")
+			utility.RedirectToMainPage(r, w, "You are already logged in!", "Fail_AlreadyLogged")
 		}
 	}
 
@@ -45,7 +45,7 @@ func (data Login) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 			if bcrypt.CompareHashAndPassword([]byte(accountHash), password) == nil {
 				sqlitecommands.UpdateSessionToken(utility.CreateSessionToken(w), uid)
-				utility.RedirectToMainPage(r, w, "Successfully logged in!", "Login")
+				utility.RedirectToMainPage(r, w, "Successfully logged in!", "Success")
 			} else {
 				loginData.Login = login
 				loginData.PassErr = "Password does not match"
