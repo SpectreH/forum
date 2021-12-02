@@ -1,10 +1,14 @@
 package utility
 
 import (
+	"crypto/rand"
 	"encoding/base64"
-	"io/ioutil"
+	"encoding/hex"
+	"io"
 	"log"
-	"mime/multipart"
+	"net/http"
+	"os"
+	"strings"
 
 	"golang.org/x/crypto/bcrypt"
 )
@@ -15,22 +19,6 @@ func GetHash(pwd []byte) string {
 		log.Println(err)
 	}
 	return string(hash)
-}
-
-func CreateImageContainer(file *multipart.FileHeader) string {
-	fileContent, err := file.Open()
-	if err != nil {
-		panic(err)
-	}
-
-	imageByteContainer, err := ioutil.ReadAll(fileContent)
-	if err != nil {
-		panic(err)
-	}
-
-	fileContent.Close()
-
-	return base64.StdEncoding.EncodeToString(imageByteContainer)
 }
 
 func DivideBodyIntoParagraphs(body string) []string {
@@ -55,6 +43,31 @@ func DivideBodyIntoParagraphs(body string) []string {
 	}
 
 	return result
+}
+
+func SavePostImage(r *http.Request) string {
+	var path string
+
+	in, header, err := r.FormFile("myImage")
+	imageData := strings.Split(header.Filename, ".")
+	if err != nil {
+		log.Println(err)
+	}
+	defer in.Close()
+
+	randBytes := make([]byte, 16)
+	rand.Read(randBytes)
+
+	path = "images/" + hex.EncodeToString(randBytes) + "." + imageData[1]
+
+	out, err := os.Create(path)
+	if err != nil {
+		log.Println(err)
+	}
+	defer out.Close()
+	io.Copy(out, in)
+
+	return path
 }
 
 func CheckErr(err error) {
