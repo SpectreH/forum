@@ -5,15 +5,16 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script src="//code.jquery.com/jquery-1.10.2.js"></script>
+  <link rel="stylesheet" href="/css/global.css" />
   <link rel="stylesheet" href="/css/registration.css"/>
   <script type="text/javascript" src="/js/registration.js"></script>
   <title>Forum - registration</title>
 </head>
 <body>
   <div class="registration-wrap">
-    <div class="registration-seciton">
+    <div class="registration-section" style="background-color: white;">
       <h1 class="registration-header">Registration</h1>
-      <form method="post" id="registration" class="registration-form">
+      <form method="post" id="registration-form" class="registration-form">
         <p class="form-element">
           <label for="username">Username:</label>
           <input type="text" id="username" name="username" value="{{.Username}}" minlength="4" required>
@@ -32,7 +33,7 @@
           <label for="pass">Password:</label>
           <input type="password" id="pass" name="password" value="" minlength="6" required><br>
         </p>
-        <input type="submit" value="Register">
+        <button class="register-button" type="submit" from="registration-form" value="Submit">Register</button>
       </form>
     </div>
   </div>

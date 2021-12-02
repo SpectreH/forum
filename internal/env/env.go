@@ -33,8 +33,8 @@ type Comment struct {
 	Body     []string
 	Likes    int
 	Dislikes int
-	Liked    string
-	Disliked string
+	Liked    bool
+	Disliked bool
 }
 
 type MainPage struct {

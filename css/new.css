@@ -12,6 +12,7 @@
 
 .new-main-section {
   min-width: 800px;
+  max-height: 800px;
 }
 
 .content-area {

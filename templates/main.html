@@ -6,6 +6,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="//code.jquery.com/jquery-1.10.2.js"></script>
+    <link rel="stylesheet" href="/css/global.css" />
     <link rel="stylesheet" href="/css/main.css" />
     <script type="text/javascript" src="/js/main.js"></script>
     <script type="text/javascript" src="/js/filter.js"></script>
@@ -13,13 +14,12 @@
     <title>Forum - Main</title>
 </head>
 
-<body style="margin: 0; background: #f0f0f0;" onload="InitMainPage();">
+<body onload="InitMainPage();">
     {{ if eq .LoggedIn true }}
-    <header>{{template "logged-in-header.html" .Username }}</header>
+    {{template "logged-in-header.html" .Username }}
     {{ else }}
-    <header>{{template "basic-header.html"}}</header>
+    {{template "basic-header.html"}}
     {{ end }}
-    <div class="header-line"></div>
     <section class="hero-block">
         <div class="alert-section">
             <div style="display: none; width: fit-content;" name="alert" type="{{.AlertType}}" id="alert" onclick="ClearAlertMessage(this)">
@@ -97,6 +97,6 @@
             </aside>
         </div>
     </section>
-    <header>{{template "footer.html"}}</header>
+    {{template "footer.html"}}
 </body>
 </html>

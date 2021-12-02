@@ -87,9 +87,9 @@ func CollectAllPostComments(postId int, w http.ResponseWriter, r *http.Request) 
 
 		if userId != -1 {
 			if sqlitecommands.GetUserScoreOnComment(comment.Id, userId, "comment_likes") {
-				comment.Liked = "liked"
+				comment.Liked = true
 			} else if sqlitecommands.GetUserScoreOnComment(comment.Id, userId, "comment_dislikes") {
-				comment.Disliked = "disliked"
+				comment.Disliked = true
 			}
 		}
 
