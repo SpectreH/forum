@@ -18,7 +18,7 @@ func UpdateUsersTable(sessionToken string, userName string, email string, passwo
 	UpdateSessionToken(sessionToken, int(uid))
 }
 
-func UpdatePostsTable(authorId int, postTitle string, postContent string, date string, imageName string, imageContainer string, imageType string, postCategories []string) {
+func UpdatePostsTable(authorId int, postTitle string, postContent string, date string, imagePath string, postCategories []string) {
 	stmt, err := env.DB.Prepare("INSERT INTO posts(author_id, title, body, created, likes, dislikes, comments) values(?,?,?,?,?,?,?)")
 	CheckErr(err)
 
@@ -26,15 +26,15 @@ func UpdatePostsTable(authorId int, postTitle string, postContent string, date s
 	CheckErr(err)
 
 	postId, _ := result.LastInsertId()
-	UpdatePostsPicturesTable(int(postId), imageName, imageContainer, imageType)
+	UpdatePostsPicturesTable(int(postId), imagePath)
 	UpdatePostsCategoriesTable(int(postId), postCategories)
 }
 
-func UpdatePostsPicturesTable(postId int, imageName string, imageContainer string, imageType string) {
-	stmt, err := env.DB.Prepare("INSERT INTO posts_images(post_id, image_name, image_container, image_type) values(?,?,?,?)")
+func UpdatePostsPicturesTable(postId int, imagePath string) {
+	stmt, err := env.DB.Prepare("INSERT INTO posts_images(post_id, image_path) values(?,?)")
 	CheckErr(err)
 
-	_, err = stmt.Exec(postId, imageName, imageContainer, imageType)
+	_, err = stmt.Exec(postId, imagePath)
 	CheckErr(err)
 }
 
@@ -200,14 +200,14 @@ func GetPostCommentCounter(postId int) int {
 	return counter
 }
 
-func GetImageData(id int) (string, string, string) {
-	var imageName, imageType, imageCountainer string
+func GetImagePath(id int) string {
+	var imagePath string
 
-	selectStmt := "SELECT image_name, image_container, image_type FROM posts_images WHERE post_id = ?"
-	err := env.DB.QueryRow(selectStmt, id).Scan(&imageName, &imageCountainer, &imageType)
+	selectStmt := "SELECT image_path FROM posts_images WHERE post_id = ?"
+	err := env.DB.QueryRow(selectStmt, id).Scan(&imagePath)
 	CheckErr(err)
 
-	return imageName, imageCountainer, imageType
+	return imagePath
 }
 
 func GetIntData(tableName string, columnName string, id int, idColumnName string) int {

@@ -30,6 +30,9 @@ func main() {
 	js := http.FileServer(http.Dir("js"))
 	http.Handle("/js/", http.StripPrefix("/js/", js))
 
+	images := http.FileServer(http.Dir("images"))
+	http.Handle("/images/", http.StripPrefix("/images/", images))
+
 	fmt.Println("Server is listening on port 8000...")
 	if http.ListenAndServe(":8000", nil) != nil {
 		log.Fatalf("%v - Internal Server Error", http.StatusInternalServerError)

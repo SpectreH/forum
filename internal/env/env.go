@@ -5,12 +5,6 @@ import (
 	"text/template"
 )
 
-type Image struct {
-	Name      string
-	Type      string
-	Container string
-}
-
 type Post struct {
 	PostId     int
 	Author     string
@@ -21,7 +15,7 @@ type Post struct {
 	DisLikes   int
 	Comments   int
 	Categories []string
-	Image      Image
+	ImagePath  string
 	Liked      bool
 	Disliked   bool
 }

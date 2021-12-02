@@ -46,7 +46,7 @@ func CollectAllPostsData() []env.Post {
 		post.Created = date.Format("January 02, 2006 at 15:04")
 		post.Author = sqlitecommands.GetUserName(authorId)
 		post.Categories = sqlitecommands.GetPostCategories(post.PostId)
-		post.Image.Name, post.Image.Container, post.Image.Type = sqlitecommands.GetImageData(post.PostId)
+		post.ImagePath = sqlitecommands.GetImagePath(post.PostId)
 		post.Body = DivideBodyIntoParagraphs(body)
 		post.Likes, post.DisLikes = sqlitecommands.GetPostRatingCounter(post.PostId)
 		post.Comments = sqlitecommands.GetPostCommentCounter(env.POSTID)

@@ -1,8 +1,11 @@
 git add css/
 git add db/
+git add internal/
 git add js/
-git add sql/
 git add templates/
+git add docker_create.sh
+git add docker_remove.sh
+git add Dockerfile
 git add go.mod
 git add go.sum
 git add main.go
