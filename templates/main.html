@@ -2,101 +2,95 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script src="//code.jquery.com/jquery-1.10.2.js"></script>
-    <link rel="stylesheet" href="/css/global.css" />
-    <link rel="stylesheet" href="/css/main.css" />
-    <script type="text/javascript" src="/js/main.js"></script>
-    <script type="text/javascript" src="/js/filter.js"></script>
-    <script type="text/javascript" src="/js/alert.js"></script>
-    <title>Forum - Main</title>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="//code.jquery.com/jquery-1.10.2.js"></script>
+  <link rel="stylesheet" href="/css/global.css" />
+  <link rel="stylesheet" href="/css/main.css" />
+  <script type="text/javascript" src="/js/main.js"></script>
+  <script type="text/javascript" src="/js/filter.js"></script>
+  <script type="text/javascript" src="/js/alert.js"></script>
+  <title>Forum - Main</title>
 </head>
 
 <body onload="InitMainPage();">
-    {{ if eq .LoggedIn true }}
-    {{template "logged-in-header.html" .Username }}
-    {{ else }}
-    {{template "basic-header.html"}}
-    {{ end }}
-    <section class="hero-block">
-        <div class="alert-section">
-            <div style="display: none; width: fit-content;" name="alert" type="{{.AlertType}}" id="alert" onclick="ClearAlertMessage(this)">
-                <h1 class="alert" style="font-size: 20px;" name="alert-text" id="alert-text">{{.Message}}</h1>
+  {{ if eq .LoggedIn true }}
+  {{template "logged-in-header.html" .Username }}
+  {{ else }}
+  {{template "basic-header.html"}}
+  {{ end }}
+  <section class="content-block">
+    <div class="content-area">
+      <div class="content" id="posts">
+        {{range .Posts}}
+        <article class="content-post" id="{{.PostId}}" data-author="{{.Author}}" data-liked="{{.Liked}}"
+          data-disliked="{{.Disliked}}" categories="{{range .Categories}}{{.}};{{end}}">
+          <div class="post-entry-content">
+            <div class="post-entry-content-image">
+              <a class="post-entry-content-image-link" href="/{{.PostId}}" aria-hidden="true">
+                <img width="180" height="180" src="data:image/{{.Image.Type}};base64,{{.Image.Container}}" class="asdf"
+                  alt="{{.Image.Name}}" itemprop="image">
+              </a>
             </div>
-        </div>
-    </section>
-    <section class="content-block">
-        <div class="content-area">
-            <div class="content" id="posts">
-                {{range .Posts}}
-                <article class="content-post" id="{{.PostId}}" data-author="{{.Author}}" data-liked="{{.Liked}}"
-                    data-disliked="{{.Disliked}}" categories="{{range .Categories}}{{.}};{{end}}">
-                    <div class="post-entry-content">
-                        <div class="post-entry-content-image">
-                            <a class="post-entry-content-image-link" href="/{{.PostId}}" aria-hidden="true">
-                                <img width="180" height="180"
-                                    src="data:image/{{.Image.Type}};base64,{{.Image.Container}}" class="asdf"
-                                    alt="{{.Image.Name}}" itemprop="image">
-                            </a>
-                        </div>
-                        <div class="post-entry-content-info">
-                            <header class="post-entry-header">
-                                <h2 class="post-entry-title">
-                                    <a class="post-entry-title-text" href="/{{.PostId}}">{{.Title}}</a>
-                                </h2>
-                            </header>
-                            <div class="post-entry-info">
-                                Posted on
-                                <time itemprop="datePublished" datetime="2021-11-11T06:30:18Z">{{.Created}}</time>
-                                by
-                                <a class="post-entry-info-author" href="https://www.wpbeginner.com/author/wpbeginner/"
-                                    title="Posted by {{.Author}}" rel="author">{{.Author}}</a>
-                            </div>
-                            <div class="post-entry-categories-section">
-                                <div class="post-entry-categories-header">Categories</div>
-                                <div class="post-entry-categories">
-                                    {{range .Categories}}
-                                    <div class="category-box" style="display: none;"><a class="category-box-content"
-                                            type="category" rel="nofollow" href="#">{{.}}</a></div>
-                                    {{end}}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </article>
-                {{end}}
-            </div>
-            <aside class="sidebar">
-                <div class="sort-widget">
-                    <h1>Sort By Categories</h1>
-                    <div class="sort-categories">
-                        {{range .Categories}}
-                        <label class="label-category">
-                            <input type="checkbox" category="{{.}}">
-                            {{.}}
-                        </label>
-                        {{end}}
-                    </div>
-                    <div class="sort-extra" id="sort-extra" style="display: none;">
-                        <label class="label-extra">
-                            <input type="checkbox" value="liked">
-                            Show your liked posts
-                        </label>
-                        <label class="label-extra">
-                            <input type="checkbox" value="disliked">
-                            Show your disliked posts
-                        </label>
-                        <label class="label-extra">
-                            <input type="checkbox" value="created">
-                            Show your created posts
-                        </label>
-                    </div>
+            <div class="post-entry-content-info">
+              <header class="post-entry-header">
+                <h2 class="post-entry-title">
+                  <a class="post-entry-title-text" href="/{{.PostId}}">{{.Title}}</a>
+                </h2>
+              </header>
+              <div class="post-entry-info">
+                Posted on
+                <time itemprop="datePublished" datetime="2021-11-11T06:30:18Z">{{.Created}}</time>
+                by
+                <a class="post-entry-info-author" href="https://www.wpbeginner.com/author/wpbeginner/"
+                  title="Posted by {{.Author}}" rel="author">{{.Author}}</a>
+              </div>
+              <div class="post-entry-categories-section">
+                <div class="post-entry-categories-header">Categories</div>
+                <div class="post-entry-categories">
+                  {{range .Categories}}
+                  <div class="category-box" style="display: none;"><a class="category-box-content" type="category"
+                      rel="nofollow" href="#">{{.}}</a></div>
+                  {{end}}
                 </div>
-            </aside>
+              </div>
+            </div>
+          </div>
+        </article>
+        {{end}}
+      </div>
+      <aside class="sidebar">
+        <div class="sort-widget">
+          <h1>Sort By Categories</h1>
+          <div class="sort-categories">
+            {{range .Categories}}
+            <label class="label-category">
+              <input type="checkbox" category="{{.}}">
+              {{.}}
+            </label>
+            {{end}}
+          </div>
+          <div class="sort-extra" id="sort-extra" style="display: none;">
+            <label class="label-extra">
+              <input type="checkbox" value="liked">
+              Show your liked posts
+            </label>
+            <label class="label-extra">
+              <input type="checkbox" value="disliked">
+              Show your disliked posts
+            </label>
+            <label class="label-extra">
+              <input type="checkbox" value="created">
+              Show your created posts
+            </label>
+          </div>
         </div>
-    </section>
-    {{template "footer.html"}}
+      </aside>
+    </div>
+  </section>
+  {{template "alert.html" .Alert}}
+  {{template "footer.html"}}
 </body>
+
 </html>

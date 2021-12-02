@@ -38,8 +38,7 @@ type Comment struct {
 }
 
 type MainPage struct {
-	Message    string
-	AlertType  string
+	Alert      Alert
 	Posts      []Post
 	Categories []string
 	LoggedIn   bool
@@ -47,11 +46,15 @@ type MainPage struct {
 }
 
 type PostPage struct {
+	Alert    Alert
+	Post     Post
+	Comments []Comment
+	LoggedIn bool
+}
+
+type Alert struct {
 	Message   string
 	AlertType string
-	Post      Post
-	Comments  []Comment
-	LoggedIn  bool
 }
 
 var MAINPAGEDATA MainPage
@@ -61,16 +64,15 @@ var TEMPLATES map[string]*template.Template
 
 func InitEnv() {
 	MAINPAGEDATA = MainPage{
-		Message:   "",
-		AlertType: "",
-		Posts:     nil,
-		LoggedIn:  false,
+		Alert:    Alert{Message: "", AlertType: ""},
+		Posts:    nil,
+		LoggedIn: false,
 	}
 
 	TEMPLATES = ParseTemplates()
 }
 
 func (data MainPage) GenerateAlert(message string, alertType string) {
-	MAINPAGEDATA.Message = message
-	MAINPAGEDATA.AlertType = alertType
+	MAINPAGEDATA.Alert.Message = message
+	MAINPAGEDATA.Alert.AlertType = alertType
 }

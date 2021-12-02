@@ -132,36 +132,6 @@ h3 {
   background: #cf1515;
 }
 
-/* Alert section */
-
-.hero-block {
-  width: 100%;
-  height: 100px;
-}
-
-.alert-section {
-  margin: 5px 0;
-  width: 100%;
-  height: 100%;
-  display: inline-flex;
-  justify-content: center;
-  align-items: center;
-}
-  
-.alert {
-  width: calc(100% + 25px);
-  height: calc(100% + 25px);
-  border-radius: 20px;
-  border: 2px solid rgba(23, 160, 23, 0.65);
-  background-color: rgba(23, 160, 23, 0.65);
-  color: white;
-  display: inline-table;
-  justify-content: center;
-  align-items: center;
-  text-align: center;
-  padding: 0 20px;    
-}
-
 /* Category section */
 
 .post-entry-categories-header {
@@ -196,6 +166,43 @@ a[type="category"] {
   font-weight: 500;
   color: #464646;
 }
+
+/* Alert Section */
+.page-alert {
+  max-width: 300px;
+  position: fixed;
+  right: 20px;
+  bottom: 50px;
+  z-index: 500;
+}
+
+.alert {
+  padding: 26px 32px 16px;
+  display: block;
+  border-radius: 8px;
+  border: 2px solid rgba(23, 160, 23, 0.65);
+  background-color: rgba(23, 160, 23, 0.65);
+}
+
+.alert-text {
+  text-align: center;  
+  font-size: 16px;
+  color: white;
+  margin: 0;
+}
+
+.page-alert-close {
+  position: absolute;
+  text-align: center;
+  top: 7px;
+  right: 7px;
+  display: block;
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+  transition: opacity .3s ease;
+  fill: white;
+} 
 
 /* Footer Section */
 .footer {

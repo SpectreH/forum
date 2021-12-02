@@ -1,5 +1,5 @@
 function InitMainPage() {
-  alertType = document.getElementById("alert").getAttribute("type")
+  alertType = document.getElementById("page-alert").getAttribute("type")
   alertMessage = document.getElementById("alert-text").innerHTML
 
   if (alertType != "") {

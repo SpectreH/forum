@@ -1,7 +1,7 @@
 let ALERT_TIMER;
 let TIME_OUT;
 function GenerateAlertBox(type, message) {
-  element = document.getElementsByTagName("div").namedItem("alert");
+  element = document.getElementById("page-alert")
 
   if (element.style.display == "flex") {
     clearInterval(ALERT_TIMER);
@@ -10,13 +10,12 @@ function GenerateAlertBox(type, message) {
 
   if (type != "") {
     element.style.opacity = 1;
-    element = document.getElementsByTagName("div").namedItem("alert");
-    document.getElementsByTagName("h1").namedItem("alert-text").innerHTML = message;
+    document.getElementsByTagName("h3").namedItem("alert-text").innerHTML = message;
     element.style.display = "flex";
 
     if (type.toLowerCase() != "success") {
-      document.getElementsByTagName("h1").namedItem("alert-text").style.backgroundColor = "rgba(211, 10, 10, 0.85)";
-      document.getElementsByTagName("h1").namedItem("alert-text").style.border = "2px solid rgba(211, 10, 10, 0.85)";
+      document.getElementById("alert").style.backgroundColor = "rgba(211, 10, 10, 0.85)";
+      document.getElementById("alert").style.border = "2px solid rgba(211, 10, 10, 0.85)";
     }
 
     TIME_OUT = setTimeout(function () { AlerFadeOut(element); }, 3000);
