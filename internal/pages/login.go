@@ -57,6 +57,6 @@ func (data Login) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := env.TEMPLATES["login.html"].Execute(w, loginData); err != nil {
-		panic(err)
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 	}
 }

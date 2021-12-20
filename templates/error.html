@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="/css/global.css" />
+  <link rel="stylesheet" href="/css/error.css" />
+  <title>Forum - Main</title>
+</head>
+
+<body>
+  {{ if eq .LoggedIn true }}
+  {{template "logged-in-header.html" .Username }}
+  {{ else }}
+  {{template "basic-header.html"}}
+  {{ end }}
+  <section class="content-block">
+    <div class="content-area">
+      <main class="new-main-section">
+        <h2 class="error-message">Will be implemented in next version!</h2>
+      </main>
+    </div>
+  </section>
+  {{template "alert.html" .Alert}}
+  {{template "footer.html"}}
+</body>
+
+</html>

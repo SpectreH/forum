@@ -288,9 +288,6 @@ func CheckDataExistence(REGDATA string, dataType string) (int, bool) {
 	sqlStmt := "SELECT " + dataType + ", uid FROM users WHERE " + dataType + " = ?"
 	err := env.DB.QueryRow(sqlStmt, REGDATA).Scan(&REGDATA, &uid)
 	if err != nil {
-		if err != sql.ErrNoRows {
-			log.Print(err)
-		}
 		return -1, false
 	}
 	return uid, true

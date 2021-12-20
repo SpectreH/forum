@@ -28,12 +28,17 @@ func (data New) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		date := time.Now().Format("2006-01-02 15:04:05")
 		imgPath := utility.SavePostImage(r)
 
+		if postTitle == "" || postContent == "" {
+			http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
+			return
+		}
+
 		sqlitecommands.UpdatePostsTable(authorId, postTitle, postContent, date, imgPath, postCategories)
 		utility.RedirectToMainPage(r, w, "You have successfully added a new post!", "Success")
 		return
 	}
 
 	if err := env.TEMPLATES["new.html"].Execute(w, env.MAINPAGEDATA); err != nil {
-		panic(err)
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 	}
 }

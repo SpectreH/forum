@@ -1,7 +1,6 @@
 package pages
 
 import (
-	"fmt"
 	"forum/internal/env"
 	sqlitecommands "forum/internal/sql"
 	"forum/internal/utility"
@@ -12,11 +11,13 @@ type Main struct {
 }
 
 func (data Main) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	utility.CheckForCookies(r, w)
+
 	if r.URL.Path != "/" {
 		if utility.RedirectToPostPage(r.URL.Path) {
 			LoadPostPage(w, r)
 		} else {
-			fmt.Fprint(w, "Error 404")
+			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		}
 		return
 	}
@@ -43,7 +44,7 @@ func (data Main) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := env.TEMPLATES["main.html"].Execute(w, env.MAINPAGEDATA); err != nil {
-		panic(err)
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 	}
 
 	env.MAINPAGEDATA.GenerateAlert("", "")

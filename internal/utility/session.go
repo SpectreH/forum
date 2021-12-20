@@ -30,7 +30,12 @@ func CheckForCookies(r *http.Request, w http.ResponseWriter) bool {
 			env.MAINPAGEDATA.LoggedIn = true
 			return true
 		} else {
-			w.WriteHeader(http.StatusBadRequest)
+			c := http.Cookie{
+				Name:   "session_token",
+				MaxAge: -1}
+			http.SetCookie(w, &c)
+			env.MAINPAGEDATA.LoggedIn = false
+			return false
 		}
 	}
 

@@ -22,6 +22,11 @@ func LoadPostPage(w http.ResponseWriter, r *http.Request) {
 		date := time.Now().Format("2006-01-02 15:04:05")
 
 		if r.FormValue("comment") != "" {
+			if r.FormValue("comment") == "" {
+				http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
+				return
+			}
+
 			comment := base64.StdEncoding.EncodeToString([]byte(r.FormValue("comment")))
 			sqlitecommands.UpdatePostsCommentsTable(env.POSTID, authorId, date, comment)
 
@@ -77,6 +82,6 @@ func LoadPostPage(w http.ResponseWriter, r *http.Request) {
 	postPageData.Comments = utility.CollectAllPostComments(env.POSTID, w, r)
 
 	if err := env.TEMPLATES["post.html"].Execute(w, postPageData); err != nil {
-		panic(err)
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 	}
 }

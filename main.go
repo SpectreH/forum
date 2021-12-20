@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 
 	_ "github.com/mattn/go-sqlite3"
 
@@ -18,11 +19,14 @@ func main() {
 	env.DB, _ = sql.Open("sqlite3", "./db/forum.db")
 	defer env.DB.Close()
 
+	os.Mkdir("images", 0700)
+
 	http.Handle("/", pages.Main{})
 	http.Handle("/login", pages.Login{})
 	http.Handle("/registration", pages.Registration{})
 	http.Handle("/new", pages.New{})
 	http.Handle("/logout", pages.Logout{})
+	http.Handle("/account", pages.Account{})
 
 	css := http.FileServer(http.Dir("css"))
 	http.Handle("/css/", http.StripPrefix("/css/", css))
